@@ -1209,4 +1209,14 @@ hr {
 
 def inject_css():
     """Inject the premium dark theme CSS into the Streamlit app."""
-    st.html(CSS)
+    st.markdown(CSS, unsafe_allow_html=True)
+
+
+def render_html(content: str):
+    """Render raw HTML in the Streamlit DOM (not in an iframe).
+
+    Using st.markdown with unsafe_allow_html=True instead of st.html()
+    because st.html() renders inside an isolated iframe where CSS classes
+    from inject_css() don't apply.
+    """
+    st.markdown(content, unsafe_allow_html=True)

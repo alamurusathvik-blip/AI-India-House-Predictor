@@ -14,56 +14,56 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from utils import (
-    inject_css, load_data, load_model, format_price,
+    inject_css, render_html, load_data, load_model, format_price,
     format_price_per_sqft, format_number, get_chart_layout,
     CHART_COLORS, GRADIENT_COLORS,
 )
 
-# ── Page Configuration ──────────────────────────────────────────────
+# â”€â”€ Page Configuration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 st.set_page_config(
     page_title='Data Insights | India House Price Predictor',
-    page_icon='📈',
+    page_icon='ðŸ“ˆ',
     layout='wide',
     initial_sidebar_state='collapsed',
 )
 
-# ── Inject Premium CSS ──────────────────────────────────────────────
+# â”€â”€ Inject Premium CSS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 inject_css()
 
-# ── Horizontal Nav Bar ──────────────────────────────────────────────
-st.html("""
+# â”€â”€ Horizontal Nav Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+render_html("""
 <nav class="top-nav">
     <div class="top-nav-inner">
-        <div class="top-nav-brand">🏠 India House Predictor</div>
+        <div class="top-nav-brand">ðŸ  India House Predictor</div>
         <div class="top-nav-links">
-            <a class="top-nav-link" href="/">🔮 Predict</a>
-            <a class="top-nav-link" href="/Market_Insights">📊 Market Insights</a>
-            <a class="top-nav-link active" href="/Data_Insights">📈 Data Insights</a>
+            <a class="top-nav-link" href="/">ðŸ”® Predict</a>
+            <a class="top-nav-link" href="/Market_Insights">ðŸ“Š Market Insights</a>
+            <a class="top-nav-link active" href="/Data_Insights">ðŸ“ˆ Data Insights</a>
         </div>
     </div>
 </nav>
 <div style="height: 4rem;"></div>
 """)
 
-# ── Load Data & Metadata ───────────────────────────────────────────
+# â”€â”€ Load Data & Metadata â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 try:
     df = load_data()
     model, preprocessor, metadata = load_model()
     data_loaded = True
 except Exception as e:
-    st.error(f"⚠️ Failed to load data: {e}")
+    st.error(f"âš ï¸ Failed to load data: {e}")
     data_loaded = False
     st.stop()
 
-# ── Page Header ─────────────────────────────────────────────────────
-st.html(textwrap.dedent("""
-<div class="page-title">🤖 AI-Generated Insights</div>
+# â”€â”€ Page Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+render_html(textwrap.dedent("""
+<div class="page-title">ðŸ¤– AI-Generated Insights</div>
 <div class="page-subtitle">Intelligent analysis powered by data science and machine learning</div>
 """))
 
-st.html("---")
+render_html("---")
 
-# ── Extract metadata values ─────────────────────────────────────────
+# â”€â”€ Extract metadata values â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 national_avg = metadata.get('national_avg_price', 0)
 national_avg_pps = metadata.get('national_avg_price_per_sqft', 0)
 city_avg_prices = metadata.get('city_avg_prices', {})
@@ -75,11 +75,11 @@ best_model_name = metadata.get('best_model_name', 'N/A')
 cleaning_stats = metadata.get('cleaning_stats', {})
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 1: City Price Insights
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 st.markdown("""
-<div class="section-header">🏙️ City Price Insights</div>
+<div class="section-header">ðŸ™ï¸ City Price Insights</div>
 <div class="section-subheader">How major cities compare to the national average</div>
 """)
 
@@ -92,10 +92,10 @@ for i, city in enumerate(top_10_cities):
     if national_avg > 0 and city_avg > 0:
         pct_diff = ((city_avg - national_avg) / national_avg) * 100
         direction = 'more' if pct_diff > 0 else 'less'
-        emoji = '📈' if pct_diff > 0 else '📉'
+        emoji = 'ðŸ“ˆ' if pct_diff > 0 else 'ðŸ“‰'
 
         with city_insight_cols[i % 2]:
-            st.html(textwrap.dedent(f"""
+            render_html(textwrap.dedent(f"""
             <div class="insight-card">
                 <div class="insight-text">
                     {emoji} Properties in <strong>{city}</strong> are
@@ -106,14 +106,14 @@ for i, city in enumerate(top_10_cities):
             </div>
             """))
 
-st.html(textwrap.dedent("<br>"))
+render_html(textwrap.dedent("<br>"))
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 2: Area Size Insights
-# ═══════════════════════════════════════════════════════════════════
-st.html(textwrap.dedent("""
-<div class="section-header">📐 Area Size Insights</div>
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+render_html(textwrap.dedent("""
+<div class="section-header">ðŸ“ Area Size Insights</div>
 <div class="section-subheader">How property size impacts pricing</div>
 """))
 
@@ -124,10 +124,10 @@ small = df[df['area_sqft'] <= 800]['price_value'].mean()
 if small > 0 and large_luxury > 0:
     premium_pct = ((large_luxury - small) / small) * 100
 
-    st.html(textwrap.dedent(f"""
+    render_html(textwrap.dedent(f"""
     <div class="insight-card">
         <div class="insight-text">
-            📐 Large and luxury properties above <strong>2,500 sq.ft</strong> command a premium of
+            ðŸ“ Large and luxury properties above <strong>2,500 sq.ft</strong> command a premium of
             <strong>{premium_pct:.0f}%</strong> over smaller properties (under 800 sq.ft).
             Large/Luxury avg: <strong>{format_price(large_luxury)}</strong> vs
             Small avg: <strong>{format_price(small)}</strong>
@@ -137,7 +137,7 @@ if small > 0 and large_luxury > 0:
 
 # Area category breakdown
 area_categories = ['Small', 'Medium', 'Large', 'Luxury']
-area_desc = {'Small': '≤ 800 sq.ft', 'Medium': '801–1500 sq.ft', 'Large': '1501–2500 sq.ft', 'Luxury': '> 2500 sq.ft'}
+area_desc = {'Small': 'â‰¤ 800 sq.ft', 'Medium': '801â€“1500 sq.ft', 'Large': '1501â€“2500 sq.ft', 'Luxury': '> 2500 sq.ft'}
 
 area_cols = st.columns(4)
 for col, cat in zip(area_cols, area_categories):
@@ -146,7 +146,7 @@ for col, cat in zip(area_cols, area_categories):
         avg_price = cat_data['price_value'].mean()
         count = len(cat_data)
         with col:
-            st.html(textwrap.dedent(f"""
+            render_html(textwrap.dedent(f"""
             <div class="kpi-card" style="padding: 1rem;">
                 <div style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;">
                     {cat} ({area_desc.get(cat, '')})
@@ -156,14 +156,14 @@ for col, cat in zip(area_cols, area_categories):
             </div>
             """))
 
-st.html(textwrap.dedent("<br>"))
+render_html(textwrap.dedent("<br>"))
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 3: Feature Importance Insights
-# ═══════════════════════════════════════════════════════════════════
-st.html(textwrap.dedent("""
-<div class="section-header">🎯 Feature Importance Insights</div>
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+render_html(textwrap.dedent("""
+<div class="section-header">ðŸŽ¯ Feature Importance Insights</div>
 <div class="section-subheader">What drives property prices according to our AI model</div>
 """))
 
@@ -175,10 +175,10 @@ if feature_importance:
     top_feat_name, top_feat_imp = feature_importance[0]
     top_feat_pct = (top_feat_imp / total_importance * 100) if total_importance > 0 else 0
 
-    st.html(textwrap.dedent(f"""
+    render_html(textwrap.dedent(f"""
     <div class="insight-card">
         <div class="insight-text">
-            🎯 <strong>{top_feat_name}</strong> is the strongest predictor of property prices,
+            ðŸŽ¯ <strong>{top_feat_name}</strong> is the strongest predictor of property prices,
             contributing <strong>{top_feat_pct:.1f}%</strong> to the model's price predictions.
         </div>
     </div>
@@ -198,10 +198,10 @@ if feature_importance:
     bed_pct = (bedroom_imp / total_importance * 100) if total_importance > 0 else 0
     loc_vs_bed = 'more' if loc_pct > bed_pct else 'less'
 
-    st.html(textwrap.dedent(f"""
+    render_html(textwrap.dedent(f"""
     <div class="insight-card">
         <div class="insight-text">
-            📍 Location-related features contribute <strong>{loc_pct:.1f}%</strong> to predictions —
+            ðŸ“ Location-related features contribute <strong>{loc_pct:.1f}%</strong> to predictions â€”
             that's {loc_vs_bed} than bedroom-related features (<strong>{bed_pct:.1f}%</strong>).
             This shows that <strong>{"where you buy matters most" if loc_pct > bed_pct else "property size matters as much as location"}</strong>.
         </div>
@@ -240,17 +240,17 @@ if feature_importance:
         st.plotly_chart(fig_fi, use_container_width=True)
 
     with fi_cols[1]:
-        st.html(textwrap.dedent("""
+        render_html(textwrap.dedent("""
         <div class="glass-card" style="padding: 1.2rem;">
             <div style="font-size: 0.85rem; font-weight: 600; color: #f1f5f9; margin-bottom: 0.8rem;">
-                📋 Top Features Breakdown
+                ðŸ“‹ Top Features Breakdown
             </div>
         """))
 
         for feat_name, feat_imp in feature_importance[:10]:
             feat_pct = (feat_imp / total_importance * 100) if total_importance > 0 else 0
             bar_width = min(feat_pct * 3, 100)
-            st.html(textwrap.dedent(f"""
+            render_html(textwrap.dedent(f"""
             <div style="margin-bottom: 0.6rem;">
                 <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.2rem;">
                     <span>{feat_name}</span>
@@ -262,16 +262,16 @@ if feature_importance:
             </div>
             """))
 
-        st.html(textwrap.dedent("</div>"))
+        render_html(textwrap.dedent("</div>"))
 
-st.html(textwrap.dedent("<br>"))
+render_html(textwrap.dedent("<br>"))
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 4: Bedroom Insights
-# ═══════════════════════════════════════════════════════════════════
-st.html(textwrap.dedent("""
-<div class="section-header">🛏️ Bedroom Insights</div>
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+render_html(textwrap.dedent("""
+<div class="section-header">ðŸ›ï¸ Bedroom Insights</div>
 <div class="section-subheader">How bedroom count affects property pricing</div>
 """))
 
@@ -287,22 +287,22 @@ for n in range(1, min(int(bedroom_avg.index.max()), 6)):
         if price_n > 0:
             jump_pct = ((price_n1 - price_n) / price_n) * 100
             direction = 'increases' if jump_pct > 0 else 'decreases'
-            emoji = '📈' if jump_pct > 0 else '📉'
+            emoji = 'ðŸ“ˆ' if jump_pct > 0 else 'ðŸ“‰'
 
             with bed_insight_cols[insight_idx % 2]:
-                st.html(textwrap.dedent(f"""
+                render_html(textwrap.dedent(f"""
                 <div class="insight-card">
                     <div class="insight-text">
                         {emoji} Adding a bedroom from <strong>{n} BHK</strong> to
                         <strong>{n + 1} BHK</strong> {direction} the average price by
                         <strong>{abs(jump_pct):.1f}%</strong>
-                        ({format_price(price_n)} → {format_price(price_n1)})
+                        ({format_price(price_n)} â†’ {format_price(price_n1)})
                     </div>
                 </div>
                 """))
             insight_idx += 1
 
-st.html(textwrap.dedent("<br>"))
+render_html(textwrap.dedent("<br>"))
 
 # Bedroom Price Chart
 bedroom_chart_data = bedroom_avg.reset_index()
@@ -330,14 +330,14 @@ fig_bed.update_layout(**layout_bed)
 
 st.plotly_chart(fig_bed, use_container_width=True)
 
-st.html(textwrap.dedent("<br>"))
+render_html(textwrap.dedent("<br>"))
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 5: Location Premium Insights
-# ═══════════════════════════════════════════════════════════════════
-st.html(textwrap.dedent("""
-<div class="section-header">💎 Location Premium Insights</div>
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+render_html(textwrap.dedent("""
+<div class="section-header">ðŸ’Ž Location Premium Insights</div>
 <div class="section-subheader">Locations commanding the highest price premiums</div>
 """))
 
@@ -360,29 +360,29 @@ if premium_score_map:
         pps_rupees = pps * 100000
 
         with premium_cols[i % 2]:
-            rank_emoji = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'][i]
-            st.html(textwrap.dedent(f"""
+            rank_emoji = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰', '4ï¸âƒ£', '5ï¸âƒ£', '6ï¸âƒ£', '7ï¸âƒ£', '8ï¸âƒ£', '9ï¸âƒ£', 'ðŸ”Ÿ'][i]
+            render_html(textwrap.dedent(f"""
             <div class="insight-card">
                 <div class="insight-text">
                     {rank_emoji} <strong>{loc_name}</strong> in {city_name} commands a
                     high price premium (score: <strong>{score:.2f}</strong>) at
-                    <strong>₹{pps_rupees:,.0f}/sq.ft</strong> average.
+                    <strong>â‚¹{pps_rupees:,.0f}/sq.ft</strong> average.
                 </div>
             </div>
             """))
 
-st.html(textwrap.dedent("<br>"))
+render_html(textwrap.dedent("<br>"))
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 6: Model Performance
-# ═══════════════════════════════════════════════════════════════════
-st.html(textwrap.dedent("""
-<div class="section-header">🧠 Model Performance</div>
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+render_html(textwrap.dedent("""
+<div class="section-header">ðŸ§  Model Performance</div>
 <div class="section-subheader">Comparison of trained machine learning models</div>
 """))
 
-# ── Model Comparison Table ──────────────────────────────────────────
+# â”€â”€ Model Comparison Table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 if metrics_dict:
     table_html = """
     <div class="glass-card" style="overflow-x: auto;">
@@ -392,9 +392,9 @@ if metrics_dict:
                     <th>Model</th>
                     <th>MAE (Lakhs)</th>
                     <th>RMSE (Lakhs)</th>
-                    <th>R² Score</th>
-                    <th>CV R² Mean</th>
-                    <th>CV R² Std</th>
+                    <th>RÂ² Score</th>
+                    <th>CV RÂ² Mean</th>
+                    <th>CV RÂ² Std</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -404,7 +404,7 @@ if metrics_dict:
     for model_name, model_metrics in metrics_dict.items():
         is_best = model_name == best_model_name
         row_class = ' class="best-model"' if is_best else ''
-        status = '⭐ Best' if is_best else '—'
+        status = 'â­ Best' if is_best else 'â€”'
 
         mae = model_metrics.get('mae', 0)
         rmse = model_metrics.get('rmse', 0)
@@ -423,7 +423,7 @@ if metrics_dict:
                         {r2:.4f}
                     </td>
                     <td>{cv_r2_mean:.4f}</td>
-                    <td>±{cv_r2_std:.4f}</td>
+                    <td>Â±{cv_r2_std:.4f}</td>
                     <td>{status}</td>
                 </tr>
         """
@@ -434,15 +434,15 @@ if metrics_dict:
     </div>
     """
 
-    st.html(textwrap.dedent(table_html))
+    render_html(textwrap.dedent(table_html))
 
-st.html(textwrap.dedent("<br>"))
+render_html(textwrap.dedent("<br>"))
 
-# ── Model Performance Visual ────────────────────────────────────────
+# â”€â”€ Model Performance Visual â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 if metrics_dict:
     perf_cols = st.columns(2)
 
-    # R² comparison chart
+    # RÂ² comparison chart
     with perf_cols[0]:
         model_names = list(metrics_dict.keys())
         r2_scores = [metrics_dict[m].get('r2', 0) for m in model_names]
@@ -460,11 +460,11 @@ if metrics_dict:
             text=[f'{v:.4f}' for v in r2_scores],
             textposition='outside',
             textfont=dict(color='#94a3b8', size=11),
-            hovertemplate='<b>%{x}</b><br>R²: %{y:.4f}<extra></extra>',
+            hovertemplate='<b>%{x}</b><br>RÂ²: %{y:.4f}<extra></extra>',
         ))
 
-        layout_r2 = get_chart_layout('R² Score Comparison', height=400)
-        layout_r2['yaxis']['title'] = 'R² Score'
+        layout_r2 = get_chart_layout('RÂ² Score Comparison', height=400)
+        layout_r2['yaxis']['title'] = 'RÂ² Score'
         layout_r2['yaxis']['range'] = [0, max(r2_scores) * 1.15] if r2_scores else [0, 1]
         fig_r2.update_layout(**layout_r2)
 
@@ -502,12 +502,12 @@ if metrics_dict:
 
         st.plotly_chart(fig_err, use_container_width=True)
 
-st.html(textwrap.dedent("<br>"))
+render_html(textwrap.dedent("<br>"))
 
-# ── Cross-Validation Scores ─────────────────────────────────────────
+# â”€â”€ Cross-Validation Scores â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 if metrics_dict:
-    st.html(textwrap.dedent("""
-    <div class="section-header">📊 Cross-Validation Analysis</div>
+    render_html(textwrap.dedent("""
+    <div class="section-header">ðŸ“Š Cross-Validation Analysis</div>
     <div class="section-subheader">Model stability and generalization scores</div>
     """))
 
@@ -521,13 +521,13 @@ if metrics_dict:
         badge = '<span style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 0.15rem 0.5rem; border-radius: 10px; font-size: 0.7rem; font-weight: 600;">BEST</span>' if is_best else ''
 
         with col:
-            st.html(textwrap.dedent(f"""
+            render_html(textwrap.dedent(f"""
             <div class="kpi-card" style="border-color: {border_color};">
                 <div style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
                     {model_name} {badge}
                 </div>
                 <div class="kpi-value" style="font-size: 1.5rem;">{cv_mean:.4f}</div>
-                <div class="kpi-label">CV R² Mean ± {cv_std:.4f}</div>
+                <div class="kpi-label">CV RÂ² Mean Â± {cv_std:.4f}</div>
                 <div style="margin-top: 0.5rem;">
                     <div style="background: rgba(255,255,255,0.05); border-radius: 4px; height: 8px; overflow: hidden;">
                         <div style="width: {cv_mean * 100}%; height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 4px;"></div>
@@ -536,13 +536,13 @@ if metrics_dict:
             </div>
             """))
 
-st.html(textwrap.dedent("<br>"))
+render_html(textwrap.dedent("<br>"))
 
-# ── Hyperparameters Section ─────────────────────────────────────────
+# â”€â”€ Hyperparameters Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 hyperparams = metadata.get('hyperparameters', {})
 if hyperparams:
-    st.html(textwrap.dedent("""
-    <div class="section-header">⚙️ Optimized Hyperparameters</div>
+    render_html(textwrap.dedent("""
+    <div class="section-header">âš™ï¸ Optimized Hyperparameters</div>
     <div class="section-subheader">Best parameters found during hyperparameter tuning</div>
     """))
 
@@ -558,20 +558,20 @@ if hyperparams:
                 </div>
                 """
 
-            st.html(textwrap.dedent(f"""
+            render_html(textwrap.dedent(f"""
             <div class="glass-card">
                 <div style="font-weight: 600; color: #f1f5f9; margin-bottom: 0.8rem; font-size: 0.95rem;">
-                    {'⭐ ' if model_name == best_model_name else ''}{model_name}
+                    {'â­ ' if model_name == best_model_name else ''}{model_name}
                 </div>
                 {params_html}
             </div>
             """))
 
-# ── Footer ──────────────────────────────────────────────────────────
-st.html(textwrap.dedent("""
+# â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+render_html(textwrap.dedent("""
 <div class="app-footer">
     <span class="powered-by">AI Insights</span>
-    <span style="margin: 0 0.5rem;">•</span>
+    <span style="margin: 0 0.5rem;">â€¢</span>
     All insights are dynamically generated from the trained model and dataset
 </div>
 """))

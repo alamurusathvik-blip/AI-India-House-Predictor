@@ -13,56 +13,56 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from utils import (
-    inject_css, load_data, load_model, format_price,
+    inject_css, render_html, load_data, load_model, format_price,
     format_price_per_sqft, format_number, get_chart_layout,
     CHART_COLORS, GRADIENT_COLORS,
 )
 
-# ── Page Configuration ──────────────────────────────────────────────
+# â”€â”€ Page Configuration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 st.set_page_config(
     page_title='Market Insights | India House Price Predictor',
-    page_icon='📊',
+    page_icon='ðŸ“Š',
     layout='wide',
     initial_sidebar_state='collapsed',
 )
 
-# ── Inject Premium CSS ──────────────────────────────────────────────
+# â”€â”€ Inject Premium CSS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 inject_css()
 
-# ── Horizontal Nav Bar ──────────────────────────────────────────────
-st.html("""
+# â”€â”€ Horizontal Nav Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+render_html("""
 <nav class="top-nav">
     <div class="top-nav-inner">
-        <div class="top-nav-brand">🏠 India House Predictor</div>
+        <div class="top-nav-brand">ðŸ  India House Predictor</div>
         <div class="top-nav-links">
-            <a class="top-nav-link" href="/">🔮 Predict</a>
-            <a class="top-nav-link active" href="/Market_Insights">📊 Market Insights</a>
-            <a class="top-nav-link" href="/Data_Insights">📈 Data Insights</a>
+            <a class="top-nav-link" href="/">ðŸ”® Predict</a>
+            <a class="top-nav-link active" href="/Market_Insights">ðŸ“Š Market Insights</a>
+            <a class="top-nav-link" href="/Data_Insights">ðŸ“ˆ Data Insights</a>
         </div>
     </div>
 </nav>
 <div style="height: 4rem;"></div>
 """)
 
-# ── Load Data ───────────────────────────────────────────────────────
+# â”€â”€ Load Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 try:
     df = load_data()
     model, preprocessor, metadata = load_model()
     data_loaded = True
 except Exception as e:
-    st.error(f"⚠️ Failed to load data: {e}")
+    st.error(f"âš ï¸ Failed to load data: {e}")
     data_loaded = False
     st.stop()
 
-# ── Page Header ─────────────────────────────────────────────────────
-st.html(textwrap.dedent("""
-<div class="page-title">📊 Market Insights</div>
+# â”€â”€ Page Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+render_html(textwrap.dedent("""
+<div class="page-title">ðŸ“Š Market Insights</div>
 <div class="page-subtitle">Comprehensive real estate analytics across Indian cities</div>
 """))
 
-st.html("---")
+render_html("---")
 
-# ── Quick Stats Row ─────────────────────────────────────────────────
+# â”€â”€ Quick Stats Row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 stats = metadata.get('dataset_stats', {})
 national_avg = metadata.get('national_avg_price', 0)
 national_avg_pps = metadata.get('national_avg_price_per_sqft', 0)
@@ -70,10 +70,10 @@ median_price = stats.get('median_price', 0)
 
 quick_cols = st.columns(4)
 quick_items = [
-    ('🏘️', format_number(len(df)), 'Properties Analyzed'),
-    ('🌆', str(df['city'].nunique()), 'Cities'),
-    ('💰', format_price(national_avg), 'National Avg Price'),
-    ('📐', format_price_per_sqft(national_avg_pps), 'National Avg/Sq.Ft'),
+    ('ðŸ˜ï¸', format_number(len(df)), 'Properties Analyzed'),
+    ('ðŸŒ†', str(df['city'].nunique()), 'Cities'),
+    ('ðŸ’°', format_price(national_avg), 'National Avg Price'),
+    ('ðŸ“', format_price_per_sqft(national_avg_pps), 'National Avg/Sq.Ft'),
 ]
 
 for col, (icon, value, label) in zip(quick_cols, quick_items):
@@ -86,18 +86,18 @@ for col, (icon, value, label) in zip(quick_cols, quick_items):
         </div>
         """))
 
-st.html(textwrap.dedent("<br>"))
+render_html(textwrap.dedent("<br>"))
 
-# ── Tabs for Chart Organization ─────────────────────────────────────
-tab1, tab2, tab3 = st.tabs(['🏙️ City Analysis', '📐 Property Analysis', '📈 Distributions'])
+# â”€â”€ Tabs for Chart Organization â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+tab1, tab2, tab3 = st.tabs(['ðŸ™ï¸ City Analysis', 'ðŸ“ Property Analysis', 'ðŸ“ˆ Distributions'])
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TAB 1: City Analysis
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 with tab1:
-    # ── Chart 1: Average Price by City (Top 20) ─────────────────────
-    st.html(textwrap.dedent("""
+    # â”€â”€ Chart 1: Average Price by City (Top 20) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    render_html(textwrap.dedent("""
     <div class="section-header">Average Price by City</div>
     <div class="section-subheader">Top 20 cities ranked by average property price</div>
     """))
@@ -126,13 +126,13 @@ with tab1:
 
     st.plotly_chart(fig1, use_container_width=True)
 
-    st.html(textwrap.dedent("<br>"))
+    render_html(textwrap.dedent("<br>"))
 
-    # ── Charts 2 & 3: Most Expensive & Affordable ──────────────────
+    # â”€â”€ Charts 2 & 3: Most Expensive & Affordable â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     exp_col, aff_col = st.columns(2)
 
     with exp_col:
-        st.html(textwrap.dedent("""
+        render_html(textwrap.dedent("""
         <div class="section-header">Top 10 Most Expensive Cities</div>
         """))
 
@@ -160,7 +160,7 @@ with tab1:
         st.plotly_chart(fig2, use_container_width=True)
 
     with aff_col:
-        st.html(textwrap.dedent("""
+        render_html(textwrap.dedent("""
         <div class="section-header">Top 10 Most Affordable Cities</div>
         """))
 
@@ -192,12 +192,12 @@ with tab1:
         st.plotly_chart(fig3, use_container_width=True)
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TAB 2: Property Analysis
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 with tab2:
-    # ── Chart 4: Area vs Price Scatter ──────────────────────────────
-    st.html(textwrap.dedent("""
+    # â”€â”€ Chart 4: Area vs Price Scatter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    render_html(textwrap.dedent("""
     <div class="section-header">Area vs Price</div>
     <div class="section-subheader">Relationship between property size and price (sampled for performance)</div>
     """))
@@ -230,10 +230,10 @@ with tab2:
 
     st.plotly_chart(fig4, use_container_width=True)
 
-    st.html(textwrap.dedent("<br>"))
+    render_html(textwrap.dedent("<br>"))
 
-    # ── Chart 6: Price Per Sq.Ft Box Plot ───────────────────────────
-    st.html(textwrap.dedent("""
+    # â”€â”€ Chart 6: Price Per Sq.Ft Box Plot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    render_html(textwrap.dedent("""
     <div class="section-header">Price Per Sq.Ft Analysis</div>
     <div class="section-subheader">Distribution of price per square foot across top 15 cities</div>
     """))
@@ -252,11 +252,11 @@ with tab2:
         color_discrete_sequence=CHART_COLORS,
         labels={
             'city': 'City',
-            'price_per_sqft_rupees': 'Price per Sq.Ft (₹)',
+            'price_per_sqft_rupees': 'Price per Sq.Ft (â‚¹)',
         },
     )
 
-    layout6 = get_chart_layout('Price Per Sq.Ft Distribution (₹)', height=500)
+    layout6 = get_chart_layout('Price Per Sq.Ft Distribution (â‚¹)', height=500)
     layout6['xaxis']['tickangle'] = -45
     layout6['showlegend'] = False
     fig6.update_layout(**layout6)
@@ -264,15 +264,15 @@ with tab2:
     st.plotly_chart(fig6, use_container_width=True)
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TAB 3: Distributions
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 with tab3:
     dist_col1, dist_col2 = st.columns(2)
 
-    # ── Chart 5: Property Distribution by City (Donut) ──────────────
+    # â”€â”€ Chart 5: Property Distribution by City (Donut) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     with dist_col1:
-        st.html(textwrap.dedent("""
+        render_html(textwrap.dedent("""
         <div class="section-header">Property Distribution</div>
         <div class="section-subheader">Properties by city (top 15)</div>
         """))
@@ -300,9 +300,9 @@ with tab3:
 
         st.plotly_chart(fig5, use_container_width=True)
 
-    # ── Chart 7: Bedroom Distribution ───────────────────────────────
+    # â”€â”€ Chart 7: Bedroom Distribution â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     with dist_col2:
-        st.html(textwrap.dedent("""
+        render_html(textwrap.dedent("""
         <div class="section-header">Bedroom Distribution</div>
         <div class="section-subheader">Properties by bedroom count</div>
         """))
@@ -331,10 +331,10 @@ with tab3:
 
         st.plotly_chart(fig7, use_container_width=True)
 
-    st.html(textwrap.dedent("<br>"))
+    render_html(textwrap.dedent("<br>"))
 
-    # ── Additional: Price Histogram ─────────────────────────────────
-    st.html(textwrap.dedent("""
+    # â”€â”€ Additional: Price Histogram â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    render_html(textwrap.dedent("""
     <div class="section-header">Price Distribution</div>
     <div class="section-subheader">Overall distribution of property prices across India</div>
     """))
@@ -351,7 +351,7 @@ with tab3:
             color='rgba(102, 126, 234, 0.6)',
             line=dict(color='rgba(102, 126, 234, 0.8)', width=1),
         ),
-        hovertemplate='Price: ₹%{x:.1f} Lakhs<br>Count: %{y}<extra></extra>',
+        hovertemplate='Price: â‚¹%{x:.1f} Lakhs<br>Count: %{y}<extra></extra>',
     ))
 
     # Add median line
@@ -383,10 +383,10 @@ with tab3:
 
     st.plotly_chart(fig8, use_container_width=True)
 
-    st.html(textwrap.dedent("<br>"))
+    render_html(textwrap.dedent("<br>"))
 
-    # ── Area Distribution ───────────────────────────────────────────
-    st.html(textwrap.dedent("""
+    # â”€â”€ Area Distribution â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    render_html(textwrap.dedent("""
     <div class="section-header">Area Size Distribution</div>
     <div class="section-subheader">Breakdown of properties by size category</div>
     """))
