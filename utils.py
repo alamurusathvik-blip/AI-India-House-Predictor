@@ -258,6 +258,34 @@ CSS = """
 footer {visibility: hidden !important;}
 header[data-testid="stHeader"] .stDeployButton {display: none !important;}
 
+/* Sidebar Toggle Chevrons (Expand & Collapse) */
+[data-testid="collapsedControl"],
+[data-testid="baseButton-headerNoPadding"],
+[data-testid="baseButton-header"] {
+    color: #f1f5f9 !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px !important;
+    padding: 0.2rem !important;
+}
+[data-testid="collapsedControl"] svg,
+[data-testid="baseButton-headerNoPadding"] svg,
+[data-testid="baseButton-header"] svg {
+    fill: #f1f5f9 !important;
+    stroke: #f1f5f9 !important;
+}
+
+[data-testid="collapsedControl"]:hover,
+[data-testid="baseButton-headerNoPadding"]:hover,
+[data-testid="baseButton-header"]:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+}
+[data-testid="collapsedControl"]:hover svg,
+[data-testid="baseButton-headerNoPadding"]:hover svg,
+[data-testid="baseButton-header"]:hover svg {
+    fill: #00d2ff !important;
+    stroke: #00d2ff !important;
+}
+
 /* ================================================================
    SIDEBAR STYLING
    ================================================================ */
