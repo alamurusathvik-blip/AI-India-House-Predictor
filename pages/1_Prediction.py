@@ -102,7 +102,7 @@ with st.sidebar:
         help='Enter the property area in square feet.',
     )
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
 
     # Auto-fill coordinates
     coord_key = f"{selected_city}||{selected_location}"
@@ -128,7 +128,7 @@ with st.sidebar:
         disabled=True,
     )
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
 
     # Predict Button
     predict_clicked = st.button('🚀 Predict Price', use_container_width=True)
@@ -149,7 +149,7 @@ if not predict_clicked:
     </div>
     """), unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
 
     # Quick stats cards
     st.markdown(textwrap.dedent("""
@@ -202,7 +202,7 @@ else:
     </div>
     """), unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
 
     # ── Confidence Range ────────────────────────────────────────────
     low_price = predicted_price * 0.90
@@ -219,7 +219,7 @@ else:
         </div>
         """), unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
 
     # ── Property Summary Card ───────────────────────────────────────
     st.markdown(textwrap.dedent("""
@@ -257,7 +257,7 @@ else:
     </div>
     """), unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
 
     # ── Price Breakdown Section ─────────────────────────────────────
     st.markdown(textwrap.dedent("""
@@ -314,7 +314,7 @@ else:
         </div>
         """), unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
 
     # ── City Average Price Card ─────────────────────────────────────
     city_avg = city_avg_prices.get(selected_city, 0)

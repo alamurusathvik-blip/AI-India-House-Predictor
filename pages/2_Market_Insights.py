@@ -69,7 +69,7 @@ for col, (icon, value, label) in zip(quick_cols, quick_items):
         </div>
         """), unsafe_allow_html=True)
 
-st.markdown("<br>", unsafe_allow_html=True)
+st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
 
 # ── Tabs for Chart Organization ─────────────────────────────────────
 tab1, tab2, tab3 = st.tabs(['🏙️ City Analysis', '📐 Property Analysis', '📈 Distributions'])
@@ -109,7 +109,7 @@ with tab1:
 
     st.plotly_chart(fig1, use_container_width=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
 
     # ── Charts 2 & 3: Most Expensive & Affordable ──────────────────
     exp_col, aff_col = st.columns(2)
@@ -213,7 +213,7 @@ with tab2:
 
     st.plotly_chart(fig4, use_container_width=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
 
     # ── Chart 6: Price Per Sq.Ft Box Plot ───────────────────────────
     st.markdown(textwrap.dedent("""
@@ -314,7 +314,7 @@ with tab3:
 
         st.plotly_chart(fig7, use_container_width=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
 
     # ── Additional: Price Histogram ─────────────────────────────────
     st.markdown(textwrap.dedent("""
@@ -366,7 +366,7 @@ with tab3:
 
     st.plotly_chart(fig8, use_container_width=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
 
     # ── Area Distribution ───────────────────────────────────────────
     st.markdown(textwrap.dedent("""
