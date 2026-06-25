@@ -31,7 +31,7 @@ except Exception as e:
 
 # ── Sidebar ─────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown(textwrap.dedent("""
+    st.html(textwrap.dedent("""
     <div style="text-align: center; padding: 1rem 0;">
         <div style="font-size: 2.5rem;">🏠</div>
         <div style="font-size: 1.1rem; font-weight: 700; color: #f1f5f9; margin-top: 0.3rem;">
@@ -41,9 +41,9 @@ with st.sidebar:
             India Real Estate Intelligence
         </div>
     </div>
-    """), unsafe_allow_html=True)
+    """))
 
-    st.markdown("---")
+    st.html("---")
 
     if model_loaded:
         best_model = metadata.get('best_model_name', 'N/A')
@@ -56,20 +56,20 @@ with st.sidebar:
                 {best_model}
             </div>
         </div>
-        """), unsafe_allow_html=True)
+        """))
 
-    st.markdown(textwrap.dedent("""
+    st.html(textwrap.dedent("""
     <div style="padding: 0.5rem 0; color: #94a3b8; font-size: 0.85rem;">
         <div style="font-weight: 600; color: #f1f5f9; margin-bottom: 0.5rem;">📌 Quick Navigation</div>
         <div style="margin-bottom: 0.3rem;">🔮 <strong>Prediction</strong> — Get instant price estimates</div>
         <div style="margin-bottom: 0.3rem;">📊 <strong>Market Insights</strong> — Explore trends & analytics</div>
         <div style="margin-bottom: 0.3rem;">🤖 <strong>AI Insights</strong> — Intelligent data analysis</div>
     </div>
-    """), unsafe_allow_html=True)
+    """))
 
 
 # ── Hero Section ────────────────────────────────────────────────────
-st.markdown(textwrap.dedent("""
+st.html(textwrap.dedent("""
 <div class="hero-section">
     <div class="hero-title">AI India House Price Predictor</div>
     <div class="hero-subtitle">
@@ -78,7 +78,7 @@ st.markdown(textwrap.dedent("""
         on comprehensive real estate data.
     </div>
 </div>
-"""), unsafe_allow_html=True)
+"""))
 
 # ── KPI Metric Cards ───────────────────────────────────────────────
 total_properties = stats.get('total_properties', 0)
@@ -116,21 +116,21 @@ kpi_data = [
 cols = st.columns(4)
 for col, kpi in zip(cols, kpi_data):
     with col:
-        st.markdown(textwrap.dedent(f"""
+        st.html(textwrap.dedent(f"""
         <div class="kpi-card" style="animation-delay: {kpi['delay']};">
             <span class="kpi-icon">{kpi['icon']}</span>
             <div class="kpi-value">{kpi['value']}</div>
             <div class="kpi-label">{kpi['label']}</div>
         </div>
-        """), unsafe_allow_html=True)
+        """))
 
-st.markdown("<br>", unsafe_allow_html=True)
+st.html("<br>")
 
 # ── Feature Cards ──────────────────────────────────────────────────
-st.markdown(textwrap.dedent("""
+st.html(textwrap.dedent("""
 <div class="section-header">Explore the Platform</div>
 <div class="section-subheader">Powerful tools for real estate intelligence</div>
-"""), unsafe_allow_html=True)
+"""))
 
 features = [
     {
@@ -153,24 +153,24 @@ features = [
 feat_cols = st.columns(3)
 for col, feat in zip(feat_cols, features):
     with col:
-        st.markdown(textwrap.dedent(f"""
+        st.html(textwrap.dedent(f"""
         <div class="feature-card">
             <span class="feature-icon">{feat['icon']}</span>
             <div class="feature-title">{feat['title']}</div>
             <div class="feature-desc">{feat['desc']}</div>
         </div>
-        """), unsafe_allow_html=True)
+        """))
 
-st.markdown("<br>", unsafe_allow_html=True)
+st.html("<br>")
 
 # ── Data Pipeline Overview ─────────────────────────────────────────
 if model_loaded:
     cleaning_stats = metadata.get('cleaning_stats', {})
     if cleaning_stats:
-        st.markdown(textwrap.dedent("""
+        st.html(textwrap.dedent("""
         <div class="section-header">Data Pipeline Summary</div>
         <div class="section-subheader">How we cleaned and prepared the dataset</div>
-        """), unsafe_allow_html=True)
+        """))
 
         pipeline_cols = st.columns(4)
         pipeline_items = [
@@ -182,13 +182,13 @@ if model_loaded:
 
         for col, (icon, label, value) in zip(pipeline_cols, pipeline_items):
             with col:
-                st.markdown(textwrap.dedent(f"""
+                st.html(textwrap.dedent(f"""
                 <div class="kpi-card">
                     <span class="kpi-icon">{icon}</span>
                     <div class="kpi-value" style="font-size: 1.4rem;">{value}</div>
                     <div class="kpi-label">{label}</div>
                 </div>
-                """), unsafe_allow_html=True)
+                """))
 
         pipeline_cols2 = st.columns(4)
         pipeline_items2 = [
@@ -200,16 +200,16 @@ if model_loaded:
 
         for col, (icon, label, value) in zip(pipeline_cols2, pipeline_items2):
             with col:
-                st.markdown(textwrap.dedent(f"""
+                st.html(textwrap.dedent(f"""
                 <div class="kpi-card">
                     <span class="kpi-icon">{icon}</span>
                     <div class="kpi-value" style="font-size: 1.4rem;">{value}</div>
                     <div class="kpi-label">{label}</div>
                 </div>
-                """), unsafe_allow_html=True)
+                """))
 
 # ── Footer ──────────────────────────────────────────────────────────
-st.markdown(textwrap.dedent("""
+st.html(textwrap.dedent("""
 <div class="app-footer">
     <span class="powered-by">Powered by Machine Learning</span>
     <span style="margin: 0 0.5rem;">•</span>
@@ -217,4 +217,4 @@ st.markdown(textwrap.dedent("""
     <span style="margin: 0 0.5rem;">•</span>
     India Real Estate Intelligence Platform
 </div>
-"""), unsafe_allow_html=True)
+"""))

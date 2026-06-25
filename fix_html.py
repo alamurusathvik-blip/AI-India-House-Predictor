@@ -3,14 +3,14 @@ import re
 with open(r'pages\3_AI_Insights.py', 'r', encoding='utf-8') as f:
     content = f.read()
 
-# Using regex to find all st.markdown("""...""") or st.markdown(f"""...""")
+# Using regex to find all st.html("""...""") or st.markdown(f"""...""")
 # that end with """) without unsafe_allow_html=True
-# and replace the ending """) with """, unsafe_allow_html=True)
+# and replace the ending """) with """)
 def replacer(match):
-    # the match is the whole st.markdown(f"""...""")
+    # the match is the whole st.html(f"""...""")
     text = match.group(0)
     if 'unsafe_allow_html=True' not in text:
-        # replace the last """) with """, unsafe_allow_html=True)
+        # replace the last """) with """)
         return text[:-1] + ', unsafe_allow_html=True)'
     return text
 

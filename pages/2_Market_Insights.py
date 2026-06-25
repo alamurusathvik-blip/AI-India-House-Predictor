@@ -38,12 +38,12 @@ except Exception as e:
     st.stop()
 
 # ── Page Header ─────────────────────────────────────────────────────
-st.markdown(textwrap.dedent("""
+st.html(textwrap.dedent("""
 <div class="page-title">📊 Market Insights</div>
 <div class="page-subtitle">Comprehensive real estate analytics across Indian cities</div>
-"""), unsafe_allow_html=True)
+"""))
 
-st.markdown("---")
+st.html("---")
 
 # ── Quick Stats Row ─────────────────────────────────────────────────
 stats = metadata.get('dataset_stats', {})
@@ -67,9 +67,9 @@ for col, (icon, value, label) in zip(quick_cols, quick_items):
             <div class="kpi-value" style="font-size: 1.4rem;">{value}</div>
             <div class="kpi-label">{label}</div>
         </div>
-        """), unsafe_allow_html=True)
+        """))
 
-st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+st.html(textwrap.dedent("<br>"))
 
 # ── Tabs for Chart Organization ─────────────────────────────────────
 tab1, tab2, tab3 = st.tabs(['🏙️ City Analysis', '📐 Property Analysis', '📈 Distributions'])
@@ -80,10 +80,10 @@ tab1, tab2, tab3 = st.tabs(['🏙️ City Analysis', '📐 Property Analysis', '
 # ═══════════════════════════════════════════════════════════════════
 with tab1:
     # ── Chart 1: Average Price by City (Top 20) ─────────────────────
-    st.markdown(textwrap.dedent("""
+    st.html(textwrap.dedent("""
     <div class="section-header">Average Price by City</div>
     <div class="section-subheader">Top 20 cities ranked by average property price</div>
-    """), unsafe_allow_html=True)
+    """))
 
     city_avg = df.groupby('city')['price_value'].mean().sort_values(ascending=False).head(20)
 
@@ -109,15 +109,15 @@ with tab1:
 
     st.plotly_chart(fig1, use_container_width=True)
 
-    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+    st.html(textwrap.dedent("<br>"))
 
     # ── Charts 2 & 3: Most Expensive & Affordable ──────────────────
     exp_col, aff_col = st.columns(2)
 
     with exp_col:
-        st.markdown(textwrap.dedent("""
+        st.html(textwrap.dedent("""
         <div class="section-header">Top 10 Most Expensive Cities</div>
-        """), unsafe_allow_html=True)
+        """))
 
         top_expensive = df.groupby('city')['price_value'].mean().sort_values(ascending=False).head(10)
 
@@ -143,9 +143,9 @@ with tab1:
         st.plotly_chart(fig2, use_container_width=True)
 
     with aff_col:
-        st.markdown(textwrap.dedent("""
+        st.html(textwrap.dedent("""
         <div class="section-header">Top 10 Most Affordable Cities</div>
-        """), unsafe_allow_html=True)
+        """))
 
         # Filter cities with at least 20 properties for statistical reliability
         city_counts = df['city'].value_counts()
@@ -180,10 +180,10 @@ with tab1:
 # ═══════════════════════════════════════════════════════════════════
 with tab2:
     # ── Chart 4: Area vs Price Scatter ──────────────────────────────
-    st.markdown(textwrap.dedent("""
+    st.html(textwrap.dedent("""
     <div class="section-header">Area vs Price</div>
     <div class="section-subheader">Relationship between property size and price (sampled for performance)</div>
-    """), unsafe_allow_html=True)
+    """))
 
     # Sample for performance
     top_10_cities = df['city'].value_counts().head(10).index.tolist()
@@ -213,13 +213,13 @@ with tab2:
 
     st.plotly_chart(fig4, use_container_width=True)
 
-    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+    st.html(textwrap.dedent("<br>"))
 
     # ── Chart 6: Price Per Sq.Ft Box Plot ───────────────────────────
-    st.markdown(textwrap.dedent("""
+    st.html(textwrap.dedent("""
     <div class="section-header">Price Per Sq.Ft Analysis</div>
     <div class="section-subheader">Distribution of price per square foot across top 15 cities</div>
-    """), unsafe_allow_html=True)
+    """))
 
     top_15_cities = df['city'].value_counts().head(15).index.tolist()
     box_df = df[df['city'].isin(top_15_cities)].copy()
@@ -255,10 +255,10 @@ with tab3:
 
     # ── Chart 5: Property Distribution by City (Donut) ──────────────
     with dist_col1:
-        st.markdown(textwrap.dedent("""
+        st.html(textwrap.dedent("""
         <div class="section-header">Property Distribution</div>
         <div class="section-subheader">Properties by city (top 15)</div>
-        """), unsafe_allow_html=True)
+        """))
 
         city_dist = df['city'].value_counts().head(15)
 
@@ -285,10 +285,10 @@ with tab3:
 
     # ── Chart 7: Bedroom Distribution ───────────────────────────────
     with dist_col2:
-        st.markdown(textwrap.dedent("""
+        st.html(textwrap.dedent("""
         <div class="section-header">Bedroom Distribution</div>
         <div class="section-subheader">Properties by bedroom count</div>
-        """), unsafe_allow_html=True)
+        """))
 
         bedroom_dist = df['bedrooms'].value_counts().sort_index()
 
@@ -314,13 +314,13 @@ with tab3:
 
         st.plotly_chart(fig7, use_container_width=True)
 
-    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+    st.html(textwrap.dedent("<br>"))
 
     # ── Additional: Price Histogram ─────────────────────────────────
-    st.markdown(textwrap.dedent("""
+    st.html(textwrap.dedent("""
     <div class="section-header">Price Distribution</div>
     <div class="section-subheader">Overall distribution of property prices across India</div>
-    """), unsafe_allow_html=True)
+    """))
 
     # Cap at 99th percentile for better visualization
     price_cap = df['price_value'].quantile(0.99)
@@ -366,13 +366,13 @@ with tab3:
 
     st.plotly_chart(fig8, use_container_width=True)
 
-    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+    st.html(textwrap.dedent("<br>"))
 
     # ── Area Distribution ───────────────────────────────────────────
-    st.markdown(textwrap.dedent("""
+    st.html(textwrap.dedent("""
     <div class="section-header">Area Size Distribution</div>
     <div class="section-subheader">Breakdown of properties by size category</div>
-    """), unsafe_allow_html=True)
+    """))
 
     area_cats = df['area_category'].value_counts()
     cat_order = ['Small', 'Medium', 'Large', 'Luxury']

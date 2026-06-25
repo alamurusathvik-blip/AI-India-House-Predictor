@@ -40,12 +40,12 @@ except Exception as e:
     st.stop()
 
 # ── Page Header ─────────────────────────────────────────────────────
-st.markdown(textwrap.dedent("""
+st.html(textwrap.dedent("""
 <div class="page-title">🤖 AI-Generated Insights</div>
 <div class="page-subtitle">Intelligent analysis powered by data science and machine learning</div>
-"""), unsafe_allow_html=True)
+"""))
 
-st.markdown("---")
+st.html("---")
 
 # ── Extract metadata values ─────────────────────────────────────────
 national_avg = metadata.get('national_avg_price', 0)
@@ -65,7 +65,7 @@ cleaning_stats = metadata.get('cleaning_stats', {})
 st.markdown("""
 <div class="section-header">🏙️ City Price Insights</div>
 <div class="section-subheader">How major cities compare to the national average</div>
-""", unsafe_allow_html=True)
+""")
 
 # Top 10 cities by property count
 top_10_cities = df['city'].value_counts().head(10).index.tolist()
@@ -79,7 +79,7 @@ for i, city in enumerate(top_10_cities):
         emoji = '📈' if pct_diff > 0 else '📉'
 
         with city_insight_cols[i % 2]:
-            st.markdown(textwrap.dedent(f"""
+            st.html(textwrap.dedent(f"""
             <div class="insight-card">
                 <div class="insight-text">
                     {emoji} Properties in <strong>{city}</strong> are
@@ -88,18 +88,18 @@ for i, city in enumerate(top_10_cities):
                     City average: <strong>{format_price(city_avg)}</strong>
                 </div>
             </div>
-            """), unsafe_allow_html=True)
+            """))
 
-st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+st.html(textwrap.dedent("<br>"))
 
 
 # ═══════════════════════════════════════════════════════════════════
 # SECTION 2: Area Size Insights
 # ═══════════════════════════════════════════════════════════════════
-st.markdown(textwrap.dedent("""
+st.html(textwrap.dedent("""
 <div class="section-header">📐 Area Size Insights</div>
 <div class="section-subheader">How property size impacts pricing</div>
-"""), unsafe_allow_html=True)
+"""))
 
 # Large/Luxury vs Small comparison
 large_luxury = df[df['area_sqft'] > 2500]['price_value'].mean()
@@ -108,7 +108,7 @@ small = df[df['area_sqft'] <= 800]['price_value'].mean()
 if small > 0 and large_luxury > 0:
     premium_pct = ((large_luxury - small) / small) * 100
 
-    st.markdown(textwrap.dedent(f"""
+    st.html(textwrap.dedent(f"""
     <div class="insight-card">
         <div class="insight-text">
             📐 Large and luxury properties above <strong>2,500 sq.ft</strong> command a premium of
@@ -117,7 +117,7 @@ if small > 0 and large_luxury > 0:
             Small avg: <strong>{format_price(small)}</strong>
         </div>
     </div>
-    """), unsafe_allow_html=True)
+    """))
 
 # Area category breakdown
 area_categories = ['Small', 'Medium', 'Large', 'Luxury']
@@ -130,7 +130,7 @@ for col, cat in zip(area_cols, area_categories):
         avg_price = cat_data['price_value'].mean()
         count = len(cat_data)
         with col:
-            st.markdown(textwrap.dedent(f"""
+            st.html(textwrap.dedent(f"""
             <div class="kpi-card" style="padding: 1rem;">
                 <div style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;">
                     {cat} ({area_desc.get(cat, '')})
@@ -138,18 +138,18 @@ for col, cat in zip(area_cols, area_categories):
                 <div class="kpi-value" style="font-size: 1.2rem;">{format_price(avg_price)}</div>
                 <div class="kpi-label" style="font-size: 0.75rem;">{format_number(count)} properties</div>
             </div>
-            """), unsafe_allow_html=True)
+            """))
 
-st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+st.html(textwrap.dedent("<br>"))
 
 
 # ═══════════════════════════════════════════════════════════════════
 # SECTION 3: Feature Importance Insights
 # ═══════════════════════════════════════════════════════════════════
-st.markdown(textwrap.dedent("""
+st.html(textwrap.dedent("""
 <div class="section-header">🎯 Feature Importance Insights</div>
 <div class="section-subheader">What drives property prices according to our AI model</div>
-"""), unsafe_allow_html=True)
+"""))
 
 if feature_importance:
     # Total importance for percentage calculation
@@ -159,14 +159,14 @@ if feature_importance:
     top_feat_name, top_feat_imp = feature_importance[0]
     top_feat_pct = (top_feat_imp / total_importance * 100) if total_importance > 0 else 0
 
-    st.markdown(textwrap.dedent(f"""
+    st.html(textwrap.dedent(f"""
     <div class="insight-card">
         <div class="insight-text">
             🎯 <strong>{top_feat_name}</strong> is the strongest predictor of property prices,
             contributing <strong>{top_feat_pct:.1f}%</strong> to the model's price predictions.
         </div>
     </div>
-    """), unsafe_allow_html=True)
+    """))
 
     # Location vs Bedroom importance
     location_imp = 0
@@ -182,7 +182,7 @@ if feature_importance:
     bed_pct = (bedroom_imp / total_importance * 100) if total_importance > 0 else 0
     loc_vs_bed = 'more' if loc_pct > bed_pct else 'less'
 
-    st.markdown(textwrap.dedent(f"""
+    st.html(textwrap.dedent(f"""
     <div class="insight-card">
         <div class="insight-text">
             📍 Location-related features contribute <strong>{loc_pct:.1f}%</strong> to predictions —
@@ -190,7 +190,7 @@ if feature_importance:
             This shows that <strong>{"where you buy matters most" if loc_pct > bed_pct else "property size matters as much as location"}</strong>.
         </div>
     </div>
-    """), unsafe_allow_html=True)
+    """))
 
     # Feature Importance Bar Chart
     fi_cols = st.columns([2, 1])
@@ -224,17 +224,17 @@ if feature_importance:
         st.plotly_chart(fig_fi, use_container_width=True)
 
     with fi_cols[1]:
-        st.markdown(textwrap.dedent("""
+        st.html(textwrap.dedent("""
         <div class="glass-card" style="padding: 1.2rem;">
             <div style="font-size: 0.85rem; font-weight: 600; color: #f1f5f9; margin-bottom: 0.8rem;">
                 📋 Top Features Breakdown
             </div>
-        """), unsafe_allow_html=True)
+        """))
 
         for feat_name, feat_imp in feature_importance[:10]:
             feat_pct = (feat_imp / total_importance * 100) if total_importance > 0 else 0
             bar_width = min(feat_pct * 3, 100)
-            st.markdown(textwrap.dedent(f"""
+            st.html(textwrap.dedent(f"""
             <div style="margin-bottom: 0.6rem;">
                 <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.2rem;">
                     <span>{feat_name}</span>
@@ -244,20 +244,20 @@ if feature_importance:
                     <div style="width: {bar_width}%; height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 4px;"></div>
                 </div>
             </div>
-            """), unsafe_allow_html=True)
+            """))
 
-        st.markdown(textwrap.dedent("</div>"), unsafe_allow_html=True)
+        st.html(textwrap.dedent("</div>"))
 
-st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+st.html(textwrap.dedent("<br>"))
 
 
 # ═══════════════════════════════════════════════════════════════════
 # SECTION 4: Bedroom Insights
 # ═══════════════════════════════════════════════════════════════════
-st.markdown(textwrap.dedent("""
+st.html(textwrap.dedent("""
 <div class="section-header">🛏️ Bedroom Insights</div>
 <div class="section-subheader">How bedroom count affects property pricing</div>
-"""), unsafe_allow_html=True)
+"""))
 
 bedroom_avg = df.groupby('bedrooms')['price_value'].mean().sort_index()
 
@@ -274,7 +274,7 @@ for n in range(1, min(int(bedroom_avg.index.max()), 6)):
             emoji = '📈' if jump_pct > 0 else '📉'
 
             with bed_insight_cols[insight_idx % 2]:
-                st.markdown(textwrap.dedent(f"""
+                st.html(textwrap.dedent(f"""
                 <div class="insight-card">
                     <div class="insight-text">
                         {emoji} Adding a bedroom from <strong>{n} BHK</strong> to
@@ -283,10 +283,10 @@ for n in range(1, min(int(bedroom_avg.index.max()), 6)):
                         ({format_price(price_n)} → {format_price(price_n1)})
                     </div>
                 </div>
-                """), unsafe_allow_html=True)
+                """))
             insight_idx += 1
 
-st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+st.html(textwrap.dedent("<br>"))
 
 # Bedroom Price Chart
 bedroom_chart_data = bedroom_avg.reset_index()
@@ -314,16 +314,16 @@ fig_bed.update_layout(**layout_bed)
 
 st.plotly_chart(fig_bed, use_container_width=True)
 
-st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+st.html(textwrap.dedent("<br>"))
 
 
 # ═══════════════════════════════════════════════════════════════════
 # SECTION 5: Location Premium Insights
 # ═══════════════════════════════════════════════════════════════════
-st.markdown(textwrap.dedent("""
+st.html(textwrap.dedent("""
 <div class="section-header">💎 Location Premium Insights</div>
 <div class="section-subheader">Locations commanding the highest price premiums</div>
-"""), unsafe_allow_html=True)
+"""))
 
 # Top 5 premium locations
 if premium_score_map:
@@ -345,7 +345,7 @@ if premium_score_map:
 
         with premium_cols[i % 2]:
             rank_emoji = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'][i]
-            st.markdown(textwrap.dedent(f"""
+            st.html(textwrap.dedent(f"""
             <div class="insight-card">
                 <div class="insight-text">
                     {rank_emoji} <strong>{loc_name}</strong> in {city_name} commands a
@@ -353,18 +353,18 @@ if premium_score_map:
                     <strong>₹{pps_rupees:,.0f}/sq.ft</strong> average.
                 </div>
             </div>
-            """), unsafe_allow_html=True)
+            """))
 
-st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+st.html(textwrap.dedent("<br>"))
 
 
 # ═══════════════════════════════════════════════════════════════════
 # SECTION 6: Model Performance
 # ═══════════════════════════════════════════════════════════════════
-st.markdown(textwrap.dedent("""
+st.html(textwrap.dedent("""
 <div class="section-header">🧠 Model Performance</div>
 <div class="section-subheader">Comparison of trained machine learning models</div>
-"""), unsafe_allow_html=True)
+"""))
 
 # ── Model Comparison Table ──────────────────────────────────────────
 if metrics_dict:
@@ -418,9 +418,9 @@ if metrics_dict:
     </div>
     """
 
-    st.markdown(textwrap.dedent(table_html), unsafe_allow_html=True)
+    st.html(textwrap.dedent(table_html))
 
-st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+st.html(textwrap.dedent("<br>"))
 
 # ── Model Performance Visual ────────────────────────────────────────
 if metrics_dict:
@@ -486,14 +486,14 @@ if metrics_dict:
 
         st.plotly_chart(fig_err, use_container_width=True)
 
-st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+st.html(textwrap.dedent("<br>"))
 
 # ── Cross-Validation Scores ─────────────────────────────────────────
 if metrics_dict:
-    st.markdown(textwrap.dedent("""
+    st.html(textwrap.dedent("""
     <div class="section-header">📊 Cross-Validation Analysis</div>
     <div class="section-subheader">Model stability and generalization scores</div>
-    """), unsafe_allow_html=True)
+    """))
 
     cv_cols = st.columns(len(metrics_dict))
     for col, (model_name, model_metrics) in zip(cv_cols, metrics_dict.items()):
@@ -505,7 +505,7 @@ if metrics_dict:
         badge = '<span style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 0.15rem 0.5rem; border-radius: 10px; font-size: 0.7rem; font-weight: 600;">BEST</span>' if is_best else ''
 
         with col:
-            st.markdown(textwrap.dedent(f"""
+            st.html(textwrap.dedent(f"""
             <div class="kpi-card" style="border-color: {border_color};">
                 <div style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
                     {model_name} {badge}
@@ -518,17 +518,17 @@ if metrics_dict:
                     </div>
                 </div>
             </div>
-            """), unsafe_allow_html=True)
+            """))
 
-st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+st.html(textwrap.dedent("<br>"))
 
 # ── Hyperparameters Section ─────────────────────────────────────────
 hyperparams = metadata.get('hyperparameters', {})
 if hyperparams:
-    st.markdown(textwrap.dedent("""
+    st.html(textwrap.dedent("""
     <div class="section-header">⚙️ Optimized Hyperparameters</div>
     <div class="section-subheader">Best parameters found during hyperparameter tuning</div>
-    """), unsafe_allow_html=True)
+    """))
 
     hp_cols = st.columns(min(len(hyperparams), 3))
     for i, (model_name, params) in enumerate(hyperparams.items()):
@@ -542,20 +542,20 @@ if hyperparams:
                 </div>
                 """
 
-            st.markdown(textwrap.dedent(f"""
+            st.html(textwrap.dedent(f"""
             <div class="glass-card">
                 <div style="font-weight: 600; color: #f1f5f9; margin-bottom: 0.8rem; font-size: 0.95rem;">
                     {'⭐ ' if model_name == best_model_name else ''}{model_name}
                 </div>
                 {params_html}
             </div>
-            """), unsafe_allow_html=True)
+            """))
 
 # ── Footer ──────────────────────────────────────────────────────────
-st.markdown(textwrap.dedent("""
+st.html(textwrap.dedent("""
 <div class="app-footer">
     <span class="powered-by">AI Insights</span>
     <span style="margin: 0 0.5rem;">•</span>
     All insights are dynamically generated from the trained model and dataset
 </div>
-"""), unsafe_allow_html=True)
+"""))

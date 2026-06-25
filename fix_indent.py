@@ -11,11 +11,11 @@ for f in files:
     if 'import textwrap' not in content:
         content = 'import textwrap\n' + content
         
-    # Find all st.markdown("""...""", unsafe_allow_html=True) 
-    # and st.markdown(f"""...""", unsafe_allow_html=True)
+    # Find all st.html("""...""") 
+    # and st.html(f"""...""")
     new_content = re.sub(
         r'st\.markdown\(\s*(f?\"\"\"(?:.*?)\"\"\")\s*,\s*unsafe_allow_html=True\s*\)',
-        r'st.markdown(textwrap.dedent(\1), unsafe_allow_html=True)',
+        r'st.html(textwrap.dedent(\1))',
         content,
         flags=re.DOTALL
     )

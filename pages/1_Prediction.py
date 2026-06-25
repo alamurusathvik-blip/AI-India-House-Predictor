@@ -39,12 +39,12 @@ except Exception as e:
     st.stop()
 
 # ── Page Header ─────────────────────────────────────────────────────
-st.markdown(textwrap.dedent("""
+st.html(textwrap.dedent("""
 <div class="page-title">🔮 Property Price Prediction</div>
 <div class="page-subtitle">Get instant AI-powered property valuations across India</div>
-"""), unsafe_allow_html=True)
+"""))
 
-st.markdown("---")
+st.html("---")
 
 # ── Sidebar Inputs ──────────────────────────────────────────────────
 with st.sidebar:
@@ -58,9 +58,9 @@ with st.sidebar:
             Fill in the details below
         </div>
     </div>
-    """), unsafe_allow_html=True)
+    """))
 
-    st.markdown("---")
+    st.html("---")
 
     # City Selection
     cities = sorted(city_location_map.keys())
@@ -80,7 +80,7 @@ with st.sidebar:
         help='Choose the specific area or locality.',
     )
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<br>")
 
     # Bedrooms
     bedrooms = st.slider(
@@ -102,17 +102,17 @@ with st.sidebar:
         help='Enter the property area in square feet.',
     )
 
-    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+    st.html(textwrap.dedent("<br>"))
 
     # Auto-fill coordinates
     coord_key = f"{selected_city}||{selected_location}"
     default_lat, default_lon = location_coords.get(coord_key, (20.5937, 78.9629))
 
-    st.markdown(textwrap.dedent("""
+    st.html(textwrap.dedent("""
     <div style="font-size: 0.8rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin-bottom: 0.5rem;">
         📌 Auto-Detected Coordinates
     </div>
-    """), unsafe_allow_html=True)
+    """))
 
     lat = st.number_input(
         'Latitude',
@@ -128,7 +128,7 @@ with st.sidebar:
         disabled=True,
     )
 
-    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+    st.html(textwrap.dedent("<br>"))
 
     # Predict Button
     predict_clicked = st.button('🚀 Predict Price', use_container_width=True)
@@ -138,7 +138,7 @@ with st.sidebar:
 
 if not predict_clicked:
     # Placeholder message
-    st.markdown(textwrap.dedent("""
+    st.html(textwrap.dedent("""
     <div class="placeholder-card">
         <span class="placeholder-icon">🏡</span>
         <div class="placeholder-text">
@@ -147,15 +147,15 @@ if not predict_clicked:
             <strong>Predict Price</strong> to get an instant AI-powered valuation.
         </div>
     </div>
-    """), unsafe_allow_html=True)
+    """))
 
-    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+    st.html(textwrap.dedent("<br>"))
 
     # Quick stats cards
-    st.markdown(textwrap.dedent("""
+    st.html(textwrap.dedent("""
     <div class="section-header">How It Works</div>
     <div class="section-subheader">Our AI model considers multiple factors for accurate predictions</div>
-    """), unsafe_allow_html=True)
+    """))
 
     how_cols = st.columns(4)
     steps = [
@@ -166,13 +166,13 @@ if not predict_clicked:
     ]
     for col, (icon, title, desc) in zip(how_cols, steps):
         with col:
-            st.markdown(textwrap.dedent(f"""
+            st.html(textwrap.dedent(f"""
             <div class="feature-card" style="min-height: 180px;">
                 <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">{icon}</span>
                 <div class="feature-title" style="font-size: 1rem;">{title}</div>
                 <div class="feature-desc">{desc}</div>
             </div>
-            """), unsafe_allow_html=True)
+            """))
 
 else:
     # ── Prediction Logic ────────────────────────────────────────────
@@ -192,7 +192,7 @@ else:
     # ── Main Prediction Card ────────────────────────────────────────
     formatted_price = format_price(predicted_price)
 
-    st.markdown(textwrap.dedent(f"""
+    st.html(textwrap.dedent(f"""
     <div class="prediction-card">
         <div class="prediction-label">Estimated Property Value</div>
         <div class="prediction-price">{formatted_price}</div>
@@ -200,9 +200,9 @@ else:
             AI-powered valuation for {selected_location}, {selected_city}
         </div>
     </div>
-    """), unsafe_allow_html=True)
+    """))
 
-    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+    st.html(textwrap.dedent("<br>"))
 
     # ── Confidence Range ────────────────────────────────────────────
     low_price = predicted_price * 0.90
@@ -210,23 +210,23 @@ else:
 
     conf_cols = st.columns([1, 2, 1])
     with conf_cols[1]:
-        st.markdown(textwrap.dedent(f"""
+        st.html(textwrap.dedent(f"""
         <div class="confidence-card">
             <div class="confidence-label">📊 Confidence Range (±10%)</div>
             <div class="confidence-range">
                 {format_price(low_price)} — {format_price(high_price)}
             </div>
         </div>
-        """), unsafe_allow_html=True)
+        """))
 
-    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+    st.html(textwrap.dedent("<br>"))
 
     # ── Property Summary Card ───────────────────────────────────────
-    st.markdown(textwrap.dedent("""
+    st.html(textwrap.dedent("""
     <div class="section-header">Property Summary</div>
-    """), unsafe_allow_html=True)
+    """))
 
-    st.markdown(textwrap.dedent(f"""
+    st.html(textwrap.dedent(f"""
     <div class="summary-card">
         <div class="summary-grid">
             <div class="summary-item">
@@ -255,15 +255,15 @@ else:
             </div>
         </div>
     </div>
-    """), unsafe_allow_html=True)
+    """))
 
-    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+    st.html(textwrap.dedent("<br>"))
 
     # ── Price Breakdown Section ─────────────────────────────────────
-    st.markdown(textwrap.dedent("""
+    st.html(textwrap.dedent("""
     <div class="section-header">Price Breakdown</div>
     <div class="section-subheader">How your property compares to market averages</div>
-    """), unsafe_allow_html=True)
+    """))
 
     # Predicted Price Per Sq.Ft
     predicted_pps_lakhs = predicted_price / area_sqft  # in lakhs per sqft
@@ -284,27 +284,27 @@ else:
     breakdown_cols = st.columns(3)
 
     with breakdown_cols[0]:
-        st.markdown(textwrap.dedent(f"""
+        st.html(textwrap.dedent(f"""
         <div class="breakdown-card">
             <div class="breakdown-label">Predicted Price/Sq.Ft</div>
             <div class="breakdown-value" style="color: #00d2ff;">₹{predicted_pps_rupees:,.0f}</div>
             <div class="breakdown-label">Per Square Foot</div>
         </div>
-        """), unsafe_allow_html=True)
+        """))
 
     with breakdown_cols[1]:
-        st.markdown(textwrap.dedent(f"""
+        st.html(textwrap.dedent(f"""
         <div class="breakdown-card">
             <div class="breakdown-label">Market Average ({selected_city})</div>
             <div class="breakdown-value" style="color: #667eea;">₹{market_pps_rupees:,.0f}</div>
             <div class="breakdown-label">City Avg Per Sq.Ft</div>
         </div>
-        """), unsafe_allow_html=True)
+        """))
 
     with breakdown_cols[2]:
         badge_class = 'badge-above' if is_above else 'badge-below'
         badge_text = f"{'↑' if is_above else '↓'} {abs(pps_diff_pct):.1f}% {'above' if is_above else 'below'} average"
-        st.markdown(textwrap.dedent(f"""
+        st.html(textwrap.dedent(f"""
         <div class="breakdown-card">
             <div class="breakdown-label">Comparison</div>
             <div style="margin: 0.5rem 0;">
@@ -312,9 +312,9 @@ else:
             </div>
             <div class="breakdown-label">vs {selected_city} Average</div>
         </div>
-        """), unsafe_allow_html=True)
+        """))
 
-    st.markdown(textwrap.dedent("<br>"), unsafe_allow_html=True)
+    st.html(textwrap.dedent("<br>"))
 
     # ── City Average Price Card ─────────────────────────────────────
     city_avg = city_avg_prices.get(selected_city, 0)
@@ -326,7 +326,7 @@ else:
 
         avg_cols = st.columns([1, 2, 1])
         with avg_cols[1]:
-            st.markdown(textwrap.dedent(f"""
+            st.html(textwrap.dedent(f"""
             <div class="confidence-card" style="background: rgba(102, 126, 234, 0.04); border-color: rgba(102, 126, 234, 0.15);">
                 <div class="confidence-label">💰 City Average Property Price</div>
                 <div class="confidence-range" style="color: #667eea;">
@@ -336,4 +336,4 @@ else:
                     <span class="{city_badge_class}">{city_badge_text}</span>
                 </div>
             </div>
-            """), unsafe_allow_html=True)
+            """))

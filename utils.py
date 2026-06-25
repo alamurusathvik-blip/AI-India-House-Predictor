@@ -1088,4 +1088,4 @@ hr {
 
 def inject_css():
     """Inject the premium dark theme CSS into the Streamlit app."""
-    st.markdown(CSS, unsafe_allow_html=True)
+    st.html(CSS)
