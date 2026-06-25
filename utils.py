@@ -1218,5 +1218,12 @@ def render_html(content: str):
     Using st.markdown with unsafe_allow_html=True instead of st.html()
     because st.html() renders inside an isolated iframe where CSS classes
     from inject_css() don't apply.
+
+    We strip leading whitespace from every line because st.markdown's
+    Markdown parser treats lines with 4+ leading spaces as code blocks,
+    causing raw HTML tags to show as text. HTML rendering is
+    whitespace-insensitive so this is safe.
     """
-    st.markdown(content, unsafe_allow_html=True)
+    stripped = '\n'.join(line.lstrip() for line in content.split('\n'))
+    st.markdown(stripped, unsafe_allow_html=True)
+

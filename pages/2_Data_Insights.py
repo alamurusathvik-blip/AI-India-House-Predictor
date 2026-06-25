@@ -78,7 +78,7 @@ cleaning_stats = metadata.get('cleaning_stats', {})
 # ═══════════════════════════════════════════════════════════════════
 # SECTION 1: City Price Insights
 # ═══════════════════════════════════════════════════════════════════
-st.markdown("""
+render_html("""
 <div class="section-header">🏙️ City Price Insights</div>
 <div class="section-subheader">How major cities compare to the national average</div>
 """)

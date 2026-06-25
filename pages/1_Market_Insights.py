@@ -78,7 +78,7 @@ quick_items = [
 
 for col, (icon, value, label) in zip(quick_cols, quick_items):
     with col:
-        st.markdown(textwrap.dedent(f"""
+        render_html(textwrap.dedent(f"""
         <div class="kpi-card">
             <span class="kpi-icon">{icon}</span>
             <div class="kpi-value" style="font-size: 1.4rem;">{value}</div>
