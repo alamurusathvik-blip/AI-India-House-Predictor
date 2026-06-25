@@ -216,8 +216,8 @@ CSS = """
     --card-border: rgba(255, 255, 255, 0.08);
     --card-hover-border: rgba(255, 255, 255, 0.15);
     --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
     --accent-blue: #00d2ff;
     --accent-purple: #764ba2;
     --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -228,6 +228,118 @@ CSS = """
     --glow-blue: 0 0 20px rgba(0, 210, 255, 0.15);
     --glow-purple: 0 0 20px rgba(118, 75, 162, 0.15);
 }
+
+/* ================================================================
+   ACCESSIBILITY — Focus rings & min font sizes
+   ================================================================ */
+*:focus-visible {
+    outline: 2px solid #667eea !important;
+    outline-offset: 3px !important;
+    border-radius: 4px !important;
+}
+
+/* Minimum readable font size across all labels */
+label, .kpi-label, .breakdown-label, .confidence-label,
+.summary-item-label, small, figcaption {
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+}
+
+/* Minimum 44px touch targets for buttons & selects */
+.stButton > button,
+.stSelectbox > div > div,
+.stSlider > div {
+    min-height: 44px !important;
+}
+
+/* ================================================================
+   HORIZONTAL TOP NAV
+   ================================================================ */
+.top-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    background: rgba(10, 10, 26, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    height: 56px;
+    display: flex;
+    align-items: center;
+}
+
+.top-nav-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.top-nav-brand {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+.top-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.top-nav-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.45rem 1.1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #94a3b8;
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    min-height: 36px;
+}
+
+.top-nav-link:hover {
+    color: #f1f5f9;
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.top-nav-link.active {
+    color: #f1f5f9;
+    background: rgba(102, 126, 234, 0.18);
+    border-bottom: 2px solid #667eea;
+}
+
+/* Mobile: stack nav links on small screens */
+@media (max-width: 600px) {
+    .top-nav-brand { display: none; }
+    .top-nav-inner { justify-content: center; padding: 0 1rem; }
+    .top-nav-link { padding: 0.4rem 0.75rem; font-size: 0.8rem; }
+}
+
+/* ================================================================
+   HIDE SIDEBAR & STREAMLIT DEFAULT HEADER CHROME
+   ================================================================ */
+[data-testid="stSidebar"] { display: none !important; }
+[data-testid="collapsedControl"] { display: none !important; }
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
+[data-testid="stToolbar"] { display: none !important; }
+
+/* Push main content below fixed nav */
+[data-testid="stAppViewContainer"] > .main > .block-container {
+    padding-top: 1rem !important;
+}
+
 
 *, *::before, *::after {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;

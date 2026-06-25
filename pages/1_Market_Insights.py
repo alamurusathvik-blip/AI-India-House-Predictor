@@ -19,13 +19,29 @@ from utils import (
 
 # ── Page Configuration ──────────────────────────────────────────────
 st.set_page_config(
-    page_title='Market Insights',
+    page_title='Market Insights | India House Price Predictor',
     page_icon='📊',
     layout='wide',
+    initial_sidebar_state='collapsed',
 )
 
 # ── Inject Premium CSS ──────────────────────────────────────────────
 inject_css()
+
+# ── Horizontal Nav Bar ──────────────────────────────────────────────
+st.html("""
+<nav class="top-nav">
+    <div class="top-nav-inner">
+        <div class="top-nav-brand">🏠 India House Predictor</div>
+        <div class="top-nav-links">
+            <a class="top-nav-link" href="/">🔮 Predict</a>
+            <a class="top-nav-link active" href="/Market_Insights">📊 Market Insights</a>
+            <a class="top-nav-link" href="/Data_Insights">📈 Data Insights</a>
+        </div>
+    </div>
+</nav>
+<div style="height: 4rem;"></div>
+""")
 
 # ── Load Data ───────────────────────────────────────────────────────
 try:

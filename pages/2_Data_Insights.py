@@ -1,11 +1,10 @@
 import textwrap
 """
-AI Insights Page
-=================
-AI-generated insights dynamically computed from the dataset
-and model metadata. Covers city pricing, area analysis,
-feature importance, bedroom trends, location premiums,
-and model performance analytics.
+Data Insights Page
+===================
+Data-driven insights computed from the dataset and model metadata.
+Covers city pricing, area analysis, feature importance, bedroom trends,
+location premiums, and model performance analytics.
 """
 
 import streamlit as st
@@ -21,13 +20,29 @@ from utils import (
 
 # ── Page Configuration ──────────────────────────────────────────────
 st.set_page_config(
-    page_title='AI Insights',
-    page_icon='🤖',
+    page_title='Data Insights | India House Price Predictor',
+    page_icon='📈',
     layout='wide',
+    initial_sidebar_state='collapsed',
 )
 
 # ── Inject Premium CSS ──────────────────────────────────────────────
 inject_css()
+
+# ── Horizontal Nav Bar ──────────────────────────────────────────────
+st.html("""
+<nav class="top-nav">
+    <div class="top-nav-inner">
+        <div class="top-nav-brand">🏠 India House Predictor</div>
+        <div class="top-nav-links">
+            <a class="top-nav-link" href="/">🔮 Predict</a>
+            <a class="top-nav-link" href="/Market_Insights">📊 Market Insights</a>
+            <a class="top-nav-link active" href="/Data_Insights">📈 Data Insights</a>
+        </div>
+    </div>
+</nav>
+<div style="height: 4rem;"></div>
+""")
 
 # ── Load Data & Metadata ───────────────────────────────────────────
 try:
