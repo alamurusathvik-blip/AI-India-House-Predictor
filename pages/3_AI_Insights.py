@@ -1,1064 +1,560 @@
-import textwrap
 """
-Shared Utilities for AI India House Price Predictor
-====================================================
-Provides common functions for data loading, model loading,
-price formatting, prediction logic, and premium CSS theming.
+AI Insights Page
+=================
+AI-generated insights dynamically computed from the dataset
+and model metadata. Covers city pricing, area analysis,
+feature importance, bedroom trends, location premiums,
+and model performance analytics.
 """
 
 import streamlit as st
 import pandas as pd
 import numpy as np
-import joblib
 import plotly.express as px
 import plotly.graph_objects as go
-from pathlib import Path
+from utils import (
+    inject_css, load_data, load_model, format_price,
+    format_price_per_sqft, format_number, get_chart_layout,
+    CHART_COLORS, GRADIENT_COLORS,
+)
+
+# ── Page Configuration ──────────────────────────────────────────────
+st.set_page_config(
+    page_title='AI Insights',
+    page_icon='🤖',
+    layout='wide',
+)
+
+# ── Inject Premium CSS ──────────────────────────────────────────────
+inject_css()
+
+# ── Load Data & Metadata ───────────────────────────────────────────
+try:
+    df = load_data()
+    model, preprocessor, metadata = load_model()
+    data_loaded = True
+except Exception as e:
+    st.error(f"⚠️ Failed to load data: {e}")
+    data_loaded = False
+    st.stop()
+
+# ── Page Header ─────────────────────────────────────────────────────
+st.markdown("""
+<div class="page-title">🤖 AI-Generated Insights</div>
+<div class="page-subtitle">Intelligent analysis powered by data science and machine learning</div>
+""", unsafe_allow_html=True)
+
+st.markdown("---")
+
+# ── Extract metadata values ─────────────────────────────────────────
+national_avg = metadata.get('national_avg_price', 0)
+national_avg_pps = metadata.get('national_avg_price_per_sqft', 0)
+city_avg_prices = metadata.get('city_avg_prices', {})
+city_avg_pps = metadata.get('city_avg_price_per_sqft', {})
+feature_importance = metadata.get('feature_importance', [])
+premium_score_map = metadata.get('premium_score_map', {})
+metrics_dict = metadata.get('metrics', {})
+best_model_name = metadata.get('best_model_name', 'N/A')
+cleaning_stats = metadata.get('cleaning_stats', {})
 
 
-# =============================================================================
-# PRICE FORMATTING
-# =============================================================================
+# ═══════════════════════════════════════════════════════════════════
+# SECTION 1: City Price Insights
+# ═══════════════════════════════════════════════════════════════════
+st.markdown("""
+<div class="section-header">🏙️ City Price Insights</div>
+<div class="section-subheader">How major cities compare to the national average</div>
+""", unsafe_allow_html=True)
 
-def format_price(price_lakhs: float) -> str:
-    """Format price in Lakhs/Crore with ₹ symbol.
+# Top 10 cities by property count
+top_10_cities = df['city'].value_counts().head(10).index.tolist()
 
-    Args:
-        price_lakhs: Price value in Lakhs.
+city_insight_cols = st.columns(2)
+for i, city in enumerate(top_10_cities):
+    city_avg = city_avg_prices.get(city, 0)
+    if national_avg > 0 and city_avg > 0:
+        pct_diff = ((city_avg - national_avg) / national_avg) * 100
+        direction = 'more' if pct_diff > 0 else 'less'
+        emoji = '📈' if pct_diff > 0 else '📉'
 
-    Returns:
-        Formatted string like '₹1.75 Crore' or '₹82.50 Lakhs'.
+        with city_insight_cols[i % 2]:
+            st.markdown(f"""
+            <div class="insight-card">
+                <div class="insight-text">
+                    {emoji} Properties in <strong>{city}</strong> are
+                    <strong>{abs(pct_diff):.1f}%</strong> {direction} expensive
+                    than the national average ({format_price(national_avg)}).
+                    City average: <strong>{format_price(city_avg)}</strong>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+
+# ═══════════════════════════════════════════════════════════════════
+# SECTION 2: Area Size Insights
+# ═══════════════════════════════════════════════════════════════════
+st.markdown("""
+<div class="section-header">📐 Area Size Insights</div>
+<div class="section-subheader">How property size impacts pricing</div>
+""", unsafe_allow_html=True)
+
+# Large/Luxury vs Small comparison
+large_luxury = df[df['area_sqft'] > 2500]['price_value'].mean()
+small = df[df['area_sqft'] <= 800]['price_value'].mean()
+
+if small > 0 and large_luxury > 0:
+    premium_pct = ((large_luxury - small) / small) * 100
+
+    st.markdown(f"""
+    <div class="insight-card">
+        <div class="insight-text">
+            📐 Large and luxury properties above <strong>2,500 sq.ft</strong> command a premium of
+            <strong>{premium_pct:.0f}%</strong> over smaller properties (under 800 sq.ft).
+            Large/Luxury avg: <strong>{format_price(large_luxury)}</strong> vs
+            Small avg: <strong>{format_price(small)}</strong>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Area category breakdown
+area_categories = ['Small', 'Medium', 'Large', 'Luxury']
+area_desc = {'Small': '≤ 800 sq.ft', 'Medium': '801–1500 sq.ft', 'Large': '1501–2500 sq.ft', 'Luxury': '> 2500 sq.ft'}
+
+area_cols = st.columns(4)
+for col, cat in zip(area_cols, area_categories):
+    cat_data = df[df['area_category'] == cat]
+    if len(cat_data) > 0:
+        avg_price = cat_data['price_value'].mean()
+        count = len(cat_data)
+        with col:
+            st.markdown(f"""
+            <div class="kpi-card" style="padding: 1rem;">
+                <div style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;">
+                    {cat} ({area_desc.get(cat, '')})
+                </div>
+                <div class="kpi-value" style="font-size: 1.2rem;">{format_price(avg_price)}</div>
+                <div class="kpi-label" style="font-size: 0.75rem;">{format_number(count)} properties</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+
+# ═══════════════════════════════════════════════════════════════════
+# SECTION 3: Feature Importance Insights
+# ═══════════════════════════════════════════════════════════════════
+st.markdown("""
+<div class="section-header">🎯 Feature Importance Insights</div>
+<div class="section-subheader">What drives property prices according to our AI model</div>
+""", unsafe_allow_html=True)
+
+if feature_importance:
+    # Total importance for percentage calculation
+    total_importance = sum(imp for _, imp in feature_importance)
+
+    # Top feature insight
+    top_feat_name, top_feat_imp = feature_importance[0]
+    top_feat_pct = (top_feat_imp / total_importance * 100) if total_importance > 0 else 0
+
+    st.markdown(f"""
+    <div class="insight-card">
+        <div class="insight-text">
+            🎯 <strong>{top_feat_name}</strong> is the strongest predictor of property prices,
+            contributing <strong>{top_feat_pct:.1f}%</strong> to the model's price predictions.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Location vs Bedroom importance
+    location_imp = 0
+    bedroom_imp = 0
+    for feat, imp in feature_importance:
+        feat_lower = feat.lower()
+        if 'location' in feat_lower or 'city' in feat_lower or 'latitude' in feat_lower or 'longitude' in feat_lower:
+            location_imp += imp
+        if 'bedroom' in feat_lower or 'bhk' in feat_lower:
+            bedroom_imp += imp
+
+    loc_pct = (location_imp / total_importance * 100) if total_importance > 0 else 0
+    bed_pct = (bedroom_imp / total_importance * 100) if total_importance > 0 else 0
+    loc_vs_bed = 'more' if loc_pct > bed_pct else 'less'
+
+    st.markdown(f"""
+    <div class="insight-card">
+        <div class="insight-text">
+            📍 Location-related features contribute <strong>{loc_pct:.1f}%</strong> to predictions —
+            that's {loc_vs_bed} than bedroom-related features (<strong>{bed_pct:.1f}%</strong>).
+            This shows that <strong>{"where you buy matters most" if loc_pct > bed_pct else "property size matters as much as location"}</strong>.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Feature Importance Bar Chart
+    fi_cols = st.columns([2, 1])
+    with fi_cols[0]:
+        top_n = min(15, len(feature_importance))
+        fi_names = [fi[0] for fi in feature_importance[:top_n]][::-1]
+        fi_values = [fi[1] for fi in feature_importance[:top_n]][::-1]
+        fi_pcts = [(v / total_importance * 100) for v in fi_values] if total_importance > 0 else fi_values
+
+        fig_fi = go.Figure()
+        fig_fi.add_trace(go.Bar(
+            y=fi_names,
+            x=fi_pcts,
+            orientation='h',
+            marker=dict(
+                color=fi_pcts,
+                colorscale=[[0, '#667eea'], [0.5, '#764ba2'], [1, '#f093fb']],
+                line=dict(width=0),
+            ),
+            text=[f'{v:.1f}%' for v in fi_pcts],
+            textposition='outside',
+            textfont=dict(color='#94a3b8', size=10),
+            hovertemplate='<b>%{y}</b><br>Importance: %{x:.2f}%<extra></extra>',
+        ))
+
+        layout_fi = get_chart_layout(f'Top {top_n} Feature Importance', height=500)
+        layout_fi['xaxis']['title'] = 'Relative Importance (%)'
+        layout_fi['margin']['l'] = 200
+        fig_fi.update_layout(**layout_fi)
+
+        st.plotly_chart(fig_fi, use_container_width=True)
+
+    with fi_cols[1]:
+        st.markdown("""
+        <div class="glass-card" style="padding: 1.2rem;">
+            <div style="font-size: 0.85rem; font-weight: 600; color: #f1f5f9; margin-bottom: 0.8rem;">
+                📋 Top Features Breakdown
+            </div>
+        """, unsafe_allow_html=True)
+
+        for feat_name, feat_imp in feature_importance[:10]:
+            feat_pct = (feat_imp / total_importance * 100) if total_importance > 0 else 0
+            bar_width = min(feat_pct * 3, 100)
+            st.markdown(f"""
+            <div style="margin-bottom: 0.6rem;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.2rem;">
+                    <span>{feat_name}</span>
+                    <span style="color: #667eea; font-weight: 600;">{feat_pct:.1f}%</span>
+                </div>
+                <div style="background: rgba(255,255,255,0.05); border-radius: 4px; height: 6px; overflow: hidden;">
+                    <div style="width: {bar_width}%; height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 4px;"></div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+
+# ═══════════════════════════════════════════════════════════════════
+# SECTION 4: Bedroom Insights
+# ═══════════════════════════════════════════════════════════════════
+st.markdown("""
+<div class="section-header">🛏️ Bedroom Insights</div>
+<div class="section-subheader">How bedroom count affects property pricing</div>
+""", unsafe_allow_html=True)
+
+bedroom_avg = df.groupby('bedrooms')['price_value'].mean().sort_index()
+
+# Generate insights for consecutive bedroom jumps
+bed_insight_cols = st.columns(2)
+insight_idx = 0
+for n in range(1, min(int(bedroom_avg.index.max()), 6)):
+    if n in bedroom_avg.index and (n + 1) in bedroom_avg.index:
+        price_n = bedroom_avg[n]
+        price_n1 = bedroom_avg[n + 1]
+        if price_n > 0:
+            jump_pct = ((price_n1 - price_n) / price_n) * 100
+            direction = 'increases' if jump_pct > 0 else 'decreases'
+            emoji = '📈' if jump_pct > 0 else '📉'
+
+            with bed_insight_cols[insight_idx % 2]:
+                st.markdown(f"""
+                <div class="insight-card">
+                    <div class="insight-text">
+                        {emoji} Adding a bedroom from <strong>{n} BHK</strong> to
+                        <strong>{n + 1} BHK</strong> {direction} the average price by
+                        <strong>{abs(jump_pct):.1f}%</strong>
+                        ({format_price(price_n)} → {format_price(price_n1)})
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            insight_idx += 1
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# Bedroom Price Chart
+bedroom_chart_data = bedroom_avg.reset_index()
+bedroom_chart_data.columns = ['Bedrooms', 'Avg_Price']
+
+fig_bed = go.Figure()
+fig_bed.add_trace(go.Bar(
+    x=[f'{int(b)} BHK' for b in bedroom_chart_data['Bedrooms']],
+    y=bedroom_chart_data['Avg_Price'],
+    marker=dict(
+        color=bedroom_chart_data['Avg_Price'],
+        colorscale=[[0, '#00d2ff'], [0.5, '#667eea'], [1, '#f093fb']],
+        line=dict(width=0),
+        cornerradius=6,
+    ),
+    text=[format_price(v) for v in bedroom_chart_data['Avg_Price']],
+    textposition='outside',
+    textfont=dict(color='#94a3b8', size=10),
+    hovertemplate='<b>%{x}</b><br>Avg Price: %{text}<extra></extra>',
+))
+
+layout_bed = get_chart_layout('Average Price by Bedroom Count', height=400)
+layout_bed['yaxis']['title'] = 'Average Price (Lakhs)'
+fig_bed.update_layout(**layout_bed)
+
+st.plotly_chart(fig_bed, use_container_width=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+
+# ═══════════════════════════════════════════════════════════════════
+# SECTION 5: Location Premium Insights
+# ═══════════════════════════════════════════════════════════════════
+st.markdown("""
+<div class="section-header">💎 Location Premium Insights</div>
+<div class="section-subheader">Locations commanding the highest price premiums</div>
+""", unsafe_allow_html=True)
+
+# Top 5 premium locations
+if premium_score_map:
+    sorted_premiums = sorted(premium_score_map.items(), key=lambda x: x[1], reverse=True)[:10]
+
+    # Try to get city for each location from the data
+    loc_city_map = {}
+    for _, row in df.drop_duplicates(subset='location_name').iterrows():
+        loc_city_map[row['location_name']] = row['city']
+
+    # Get avg price_per_sqft for these locations
+    loc_avg_pps = df.groupby('location_name')['price_per_sqft'].mean()
+
+    premium_cols = st.columns(2)
+    for i, (loc_name, score) in enumerate(sorted_premiums[:10]):
+        city_name = loc_city_map.get(loc_name, 'India')
+        pps = loc_avg_pps.get(loc_name, 0)
+        pps_rupees = pps * 100000
+
+        with premium_cols[i % 2]:
+            rank_emoji = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'][i]
+            st.markdown(f"""
+            <div class="insight-card">
+                <div class="insight-text">
+                    {rank_emoji} <strong>{loc_name}</strong> in {city_name} commands a
+                    high price premium (score: <strong>{score:.2f}</strong>) at
+                    <strong>₹{pps_rupees:,.0f}/sq.ft</strong> average.
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+
+# ═══════════════════════════════════════════════════════════════════
+# SECTION 6: Model Performance
+# ═══════════════════════════════════════════════════════════════════
+st.markdown("""
+<div class="section-header">🧠 Model Performance</div>
+<div class="section-subheader">Comparison of trained machine learning models</div>
+""", unsafe_allow_html=True)
+
+# ── Model Comparison Table ──────────────────────────────────────────
+if metrics_dict:
+    table_html = """
+    <div class="glass-card" style="overflow-x: auto;">
+        <table class="model-table">
+            <thead>
+                <tr>
+                    <th>Model</th>
+                    <th>MAE (Lakhs)</th>
+                    <th>RMSE (Lakhs)</th>
+                    <th>R² Score</th>
+                    <th>CV R² Mean</th>
+                    <th>CV R² Std</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
     """
-    if price_lakhs >= 100:
-        crore = price_lakhs / 100
-        return f'₹{crore:.2f} Crore'
-    else:
-        return f'₹{price_lakhs:.2f} Lakhs'
 
+    for model_name, model_metrics in metrics_dict.items():
+        is_best = model_name == best_model_name
+        row_class = ' class="best-model"' if is_best else ''
+        status = '⭐ Best' if is_best else '—'
 
-def format_price_per_sqft(pps_lakhs: float) -> str:
-    """Format price_per_sqft (which is in lakhs) to ₹X,XXX per sq.ft.
+        mae = model_metrics.get('mae', 0)
+        rmse = model_metrics.get('rmse', 0)
+        r2 = model_metrics.get('r2', 0)
+        cv_r2_mean = model_metrics.get('cv_r2_mean', 0)
+        cv_r2_std = model_metrics.get('cv_r2_std', 0)
 
-    Args:
-        pps_lakhs: Price per square foot in Lakhs.
+        table_html += f"""
+                <tr{row_class}>
+                    <td style="font-weight: {'700' if is_best else '400'}; color: {'#667eea' if is_best else '#94a3b8'};">
+                        {model_name}
+                    </td>
+                    <td>{mae:.2f}</td>
+                    <td>{rmse:.2f}</td>
+                    <td style="color: {'#4ade80' if r2 > 0.8 else '#fbbf24' if r2 > 0.6 else '#f87171'};">
+                        {r2:.4f}
+                    </td>
+                    <td>{cv_r2_mean:.4f}</td>
+                    <td>±{cv_r2_std:.4f}</td>
+                    <td>{status}</td>
+                </tr>
+        """
 
-    Returns:
-        Formatted string like '₹8,500/sq.ft'.
+    table_html += """
+            </tbody>
+        </table>
+    </div>
     """
-    rupees = pps_lakhs * 100000  # convert lakhs to rupees
-    return f'₹{rupees:,.0f}/sq.ft'
 
-
-def format_number(num: float) -> str:
-    """Format a number with commas for thousands separators.
-
-    Args:
-        num: Number to format.
-
-    Returns:
-        Formatted string like '1,23,456'.
-    """
-    return f'{num:,.0f}'
-
-
-# =============================================================================
-# MODEL & DATA LOADING
-# =============================================================================
-
-@st.cache_resource
-def load_model():
-    """Load the trained model, preprocessor, and training metadata.
-
-    Returns:
-        Tuple of (model, preprocessor, metadata dict).
-    """
-    model = joblib.load('models/model.pkl')
-    preprocessor = joblib.load('models/preprocessor.pkl')
-    metadata = joblib.load('models/training_metadata.pkl')
-    return model, preprocessor, metadata
-
-
-@st.cache_data
-def load_data():
-    """Load the cleaned dataset used for analytics.
-
-    Returns:
-        pandas DataFrame with cleaned property data.
-    """
-    return joblib.load('models/cleaned_data.pkl')
-
-
-# =============================================================================
-# PREDICTION LOGIC
-# =============================================================================
-
-def predict_price(city, location, bedrooms, area_sqft, lat, lon, model, preprocessor, metadata):
-    """Predict property price from user inputs.
-
-    Args:
-        city: City name.
-        location: Location name within the city.
-        bedrooms: Number of bedrooms.
-        area_sqft: Property area in square feet.
-        lat: Latitude coordinate.
-        lon: Longitude coordinate.
-        model: Trained ML model.
-        preprocessor: Fitted sklearn ColumnTransformer.
-        metadata: Training metadata dict.
-
-    Returns:
-        Predicted price in Lakhs (minimum ₹1 Lakh).
-    """
-    bedroom_density = area_sqft / max(bedrooms, 1)
-    geo_cluster = str(metadata['geo_clusterer'].predict([[lat, lon]])[0])
-
-    if area_sqft <= 800:
-        area_cat = 'Small'
-    elif area_sqft <= 1500:
-        area_cat = 'Medium'
-    elif area_sqft <= 2500:
-        area_cat = 'Large'
-    else:
-        area_cat = 'Luxury'
-
-    premium_score = metadata['premium_score_map'].get(location, 0.5)
-
-    input_df = pd.DataFrame([{
-        'city': city,
-        'location_name': location,
-        'latitude': lat,
-        'longitude': lon,
-        'bedrooms': bedrooms,
-        'area_sqft': float(area_sqft),
-        'bedroom_density': bedroom_density,
-        'geo_cluster': geo_cluster,
-        'area_category': area_cat,
-        'premium_location_score': premium_score,
-    }])
-
-    X = preprocessor.transform(input_df)
-    prediction = model.predict(X)[0]
-    return max(prediction, 1.0)  # minimum ₹1 Lakh
-
-
-# =============================================================================
-# PLOTLY THEME HELPERS
-# =============================================================================
-
-CHART_COLORS = [
-    '#00d2ff', '#3a7bd5', '#667eea', '#764ba2', '#f093fb',
-    '#f5576c', '#4facfe', '#00f2fe', '#43e97b', '#38f9d7',
-    '#fa709a', '#fee140', '#a18cd1', '#fbc2eb', '#8fd3f4',
-]
-
-GRADIENT_COLORS = [
-    '#0ea5e9', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
-    '#ec4899', '#f43f5e', '#f97316', '#eab308', '#22c55e',
-]
-
-
-def get_chart_layout(title: str = '', height: int = 450) -> dict:
-    """Get standard Plotly chart layout with dark theme.
-
-    Args:
-        title: Chart title.
-        height: Chart height in pixels.
-
-    Returns:
-        Dict of Plotly layout properties.
-    """
-    return dict(
-        title=dict(
-            text=title,
-            font=dict(family='Inter, sans-serif', size=18, color='#e2e8f0'),
-            x=0.5,
-            xanchor='center',
-        ),
-        template='plotly_dark',
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        height=height,
-        font=dict(family='Inter, sans-serif', color='#94a3b8'),
-        margin=dict(l=60, r=30, t=60, b=50),
-        xaxis=dict(
-            gridcolor='rgba(255,255,255,0.05)',
-            zerolinecolor='rgba(255,255,255,0.1)',
-        ),
-        yaxis=dict(
-            gridcolor='rgba(255,255,255,0.05)',
-            zerolinecolor='rgba(255,255,255,0.1)',
-        ),
-        legend=dict(
-            bgcolor='rgba(0,0,0,0)',
-            bordercolor='rgba(255,255,255,0.1)',
-            font=dict(color='#94a3b8'),
-        ),
-    )
-
-
-# =============================================================================
-# CSS INJECTION
-# =============================================================================
-
-CSS = """
-<style>
-/* ================================================================
-   GOOGLE FONT — Inter
-   ================================================================ */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-/* ================================================================
-   ROOT & GLOBAL RESET
-   ================================================================ */
-:root {
-    --bg-primary: #0a0a1a;
-    --bg-secondary: #1a1a2e;
-    --bg-tertiary: #16213e;
-    --card-bg: rgba(255, 255, 255, 0.03);
-    --card-border: rgba(255, 255, 255, 0.08);
-    --card-hover-border: rgba(255, 255, 255, 0.15);
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --accent-blue: #00d2ff;
-    --accent-purple: #764ba2;
-    --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --kpi-gradient: linear-gradient(90deg, #00d2ff, #3a7bd5);
-    --sidebar-bg: rgba(15, 15, 35, 0.95);
-    --border-radius: 16px;
-    --transition-speed: 0.3s;
-    --glow-blue: 0 0 20px rgba(0, 210, 255, 0.15);
-    --glow-purple: 0 0 20px rgba(118, 75, 162, 0.15);
-}
-
-*, *::before, *::after {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-    box-sizing: border-box;
-}
-
-/* ================================================================
-   MAIN APP BACKGROUND
-   ================================================================ */
-.stApp, [data-testid="stAppViewContainer"] {
-    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%) !important;
-    color: var(--text-primary) !important;
-}
-
-.stApp > header {
-    background: transparent !important;
-}
-
-[data-testid="stHeader"] {
-    background: rgba(10, 10, 26, 0.8) !important;
-    backdrop-filter: blur(10px) !important;
-}
-
-/* ================================================================
-   HIDE DEFAULT STREAMLIT ELEMENTS
-   ================================================================ */
-#MainMenu {visibility: hidden !important;}
-footer {visibility: hidden !important;}
-header[data-testid="stHeader"] .stDeployButton {display: none !important;}
-
-/* ================================================================
-   SIDEBAR STYLING
-   ================================================================ */
-[data-testid="stSidebar"] {
-    background: var(--sidebar-bg) !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
-    backdrop-filter: blur(20px) !important;
-}
-
-[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
-    color: var(--text-secondary) !important;
-}
-
-[data-testid="stSidebar"] .stSelectbox label,
-[data-testid="stSidebar"] .stSlider label,
-[data-testid="stSidebar"] .stNumberInput label {
-    color: var(--text-primary) !important;
-    font-weight: 500 !important;
-    font-size: 0.9rem !important;
-    letter-spacing: 0.02em !important;
-}
-
-[data-testid="stSidebar"] [data-testid="stSidebarNav"] {
-    padding-top: 1rem !important;
-}
-
-[data-testid="stSidebar"] [data-testid="stSidebarNav"] a {
-    color: var(--text-secondary) !important;
-    padding: 0.6rem 1rem !important;
-    border-radius: 10px !important;
-    transition: all var(--transition-speed) ease !important;
-    margin: 2px 8px !important;
-    font-weight: 500 !important;
-}
-
-[data-testid="stSidebar"] [data-testid="stSidebarNav"] a:hover {
-    background: rgba(255, 255, 255, 0.06) !important;
-    color: var(--text-primary) !important;
-}
-
-[data-testid="stSidebar"] [data-testid="stSidebarNav"] a[aria-selected="true"] {
-    background: rgba(102, 126, 234, 0.15) !important;
-    color: #667eea !important;
-    border-left: 3px solid #667eea !important;
-}
-
-/* ================================================================
-   GLASSMORPHIC CARD CLASSES
-   ================================================================ */
-.glass-card {
-    background: var(--card-bg) !important;
-    border: 1px solid var(--card-border) !important;
-    border-radius: var(--border-radius) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    padding: 1.5rem !important;
-    margin-bottom: 1rem !important;
-    transition: all var(--transition-speed) ease !important;
-    animation: fadeInUp 0.6s ease-out !important;
-}
-
-.glass-card:hover {
-    border-color: var(--card-hover-border) !important;
-    box-shadow: var(--glow-blue) !important;
-    transform: translateY(-2px) !important;
-}
-
-/* ================================================================
-   KPI / METRIC CARDS
-   ================================================================ */
-.kpi-card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--border-radius);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    padding: 1.5rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    transition: all var(--transition-speed) ease;
-    animation: fadeInUp 0.6s ease-out;
-}
-
-.kpi-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: var(--kpi-gradient);
-    border-radius: var(--border-radius) var(--border-radius) 0 0;
-}
-
-.kpi-card:hover {
-    border-color: var(--card-hover-border);
-    box-shadow: var(--glow-blue);
-    transform: translateY(-4px);
-}
-
-.kpi-icon {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
-    display: block;
-}
-
-.kpi-value {
-    font-size: 1.8rem;
-    font-weight: 700;
-    background: var(--kpi-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin: 0.3rem 0;
-    line-height: 1.2;
-}
-
-.kpi-label {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-top: 0.3rem;
-}
-
-/* ================================================================
-   PREDICTION RESULT CARD
-   ================================================================ */
-.prediction-card {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(102, 126, 234, 0.3);
-    border-radius: 20px;
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
-    padding: 2.5rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    animation: fadeInScale 0.8s ease-out;
-}
-
-.prediction-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
-}
-
-.prediction-card::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(102, 126, 234, 0.05) 0%, transparent 60%);
-    pointer-events: none;
-}
-
-.prediction-label {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.prediction-price {
-    font-size: 3.2rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #00d2ff, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1.2;
-    margin: 0.5rem 0;
-}
-
-.prediction-subtitle {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    margin-top: 0.5rem;
-}
-
-/* ================================================================
-   CONFIDENCE RANGE CARD
-   ================================================================ */
-.confidence-card {
-    background: rgba(0, 210, 255, 0.04);
-    border: 1px solid rgba(0, 210, 255, 0.15);
-    border-radius: var(--border-radius);
-    padding: 1.2rem 1.5rem;
-    text-align: center;
-    animation: fadeInUp 0.7s ease-out;
-}
-
-.confidence-label {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 600;
-}
-
-.confidence-range {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: var(--accent-blue);
-    margin-top: 0.3rem;
-}
-
-/* ================================================================
-   PROPERTY SUMMARY CARD
-   ================================================================ */
-.summary-card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--border-radius);
-    backdrop-filter: blur(20px);
-    padding: 1.5rem;
-    animation: fadeInUp 0.8s ease-out;
-}
-
-.summary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
-    margin-top: 0.5rem;
-}
-
-.summary-item {
-    text-align: center;
-    padding: 0.8rem;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-.summary-item-label {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 600;
-}
-
-.summary-item-value {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-top: 0.3rem;
-}
-
-/* ================================================================
-   COMPARISON BADGE
-   ================================================================ */
-.badge-above {
-    display: inline-block;
-    padding: 0.3rem 0.8rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    background: rgba(239, 68, 68, 0.15);
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.3);
-}
-
-.badge-below {
-    display: inline-block;
-    padding: 0.3rem 0.8rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
-    border: 1px solid rgba(34, 197, 94, 0.3);
-}
-
-/* ================================================================
-   FEATURE CARDS (Landing page)
-   ================================================================ */
-.feature-card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--border-radius);
-    backdrop-filter: blur(20px);
-    padding: 2rem;
-    text-align: center;
-    transition: all var(--transition-speed) ease;
-    animation: fadeInUp 0.6s ease-out;
-    min-height: 220px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.feature-card:hover {
-    border-color: var(--card-hover-border);
-    box-shadow: var(--glow-purple);
-    transform: translateY(-6px);
-}
-
-.feature-icon {
-    font-size: 2.8rem;
-    margin-bottom: 1rem;
-    display: block;
-}
-
-.feature-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-}
-
-.feature-desc {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    line-height: 1.5;
-}
-
-/* ================================================================
-   HERO SECTION
-   ================================================================ */
-.hero-section {
-    text-align: center;
-    padding: 2rem 0 1.5rem 0;
-    animation: fadeInDown 0.8s ease-out;
-}
-
-.hero-title {
-    font-size: 3rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #00d2ff, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 0.5rem;
-    line-height: 1.2;
-}
-
-.hero-subtitle {
-    font-size: 1.15rem;
-    color: var(--text-secondary);
-    font-weight: 400;
-    max-width: 650px;
-    margin: 0 auto;
-    line-height: 1.6;
-}
-
-/* ================================================================
-   SECTION HEADERS
-   ================================================================ */
-.section-header {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.3rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 3px solid transparent;
-    border-image: linear-gradient(90deg, #667eea, #764ba2, transparent) 1;
-    display: inline-block;
-}
-
-.section-subheader {
-    font-size: 0.95rem;
-    color: var(--text-secondary);
-    margin-bottom: 1.5rem;
-    font-weight: 400;
-}
-
-/* ================================================================
-   INSIGHT CARDS (AI Insights Page)
-   ================================================================ */
-.insight-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
-    backdrop-filter: blur(20px);
-    padding: 1.2rem 1.5rem;
-    margin-bottom: 0.8rem;
-    transition: all var(--transition-speed) ease;
-    animation: fadeInUp 0.5s ease-out;
-}
-
-.insight-card:hover {
-    border-color: rgba(102, 126, 234, 0.3);
-    box-shadow: 0 0 15px rgba(102, 126, 234, 0.08);
-    transform: translateX(4px);
-}
-
-.insight-text {
-    font-size: 0.95rem;
-    color: var(--text-primary);
-    line-height: 1.6;
-    font-weight: 400;
-}
-
-.insight-text strong {
-    color: #00d2ff;
-    font-weight: 600;
-}
-
-/* ================================================================
-   MODEL COMPARISON TABLE
-   ================================================================ */
-.model-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    animation: fadeInUp 0.6s ease-out;
-}
-
-.model-table thead th {
-    background: rgba(102, 126, 234, 0.15);
-    color: var(--text-primary);
-    font-weight: 600;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 0.8rem 1rem;
-    text-align: left;
-    border-bottom: 2px solid rgba(102, 126, 234, 0.3);
-}
-
-.model-table tbody td {
-    padding: 0.7rem 1rem;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    background: rgba(255, 255, 255, 0.01);
-}
-
-.model-table tbody tr:hover td {
-    background: rgba(255, 255, 255, 0.04);
-    color: var(--text-primary);
-}
-
-.model-table tbody tr.best-model td {
-    background: rgba(102, 126, 234, 0.08);
-    color: var(--text-primary);
-    font-weight: 500;
-}
-
-/* ================================================================
-   BUTTONS
-   ================================================================ */
-.stButton > button {
-    background: linear-gradient(135deg, #667eea, #764ba2) !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 12px !important;
-    padding: 0.6rem 2rem !important;
-    font-weight: 600 !important;
-    font-size: 1rem !important;
-    letter-spacing: 0.03em !important;
-    transition: all var(--transition-speed) ease !important;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3) !important;
-    width: 100% !important;
-}
-
-.stButton > button:hover {
-    transform: scale(1.02) !important;
-    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4) !important;
-}
-
-.stButton > button:active {
-    transform: scale(0.98) !important;
-}
-
-/* ================================================================
-   SELECTBOX, SLIDER, NUMBER INPUT
-   ================================================================ */
-[data-testid="stSelectbox"] > div > div {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 10px !important;
-    color: var(--text-primary) !important;
-}
-
-.stSlider > div > div > div {
-    background: rgba(102, 126, 234, 0.3) !important;
-}
-
-.stSlider [data-testid="stThumbValue"] {
-    color: var(--text-primary) !important;
-}
-
-/* ================================================================
-   TABS
-   ================================================================ */
-.stTabs [data-baseweb="tab-list"] {
-    gap: 0.5rem;
-    background: transparent;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding-bottom: 0;
-}
-
-.stTabs [data-baseweb="tab"] {
-    background: transparent !important;
-    color: var(--text-secondary) !important;
-    border: none !important;
-    border-radius: 10px 10px 0 0 !important;
-    padding: 0.6rem 1.5rem !important;
-    font-weight: 500 !important;
-    transition: all var(--transition-speed) ease !important;
-}
-
-.stTabs [data-baseweb="tab"]:hover {
-    color: var(--text-primary) !important;
-    background: rgba(255, 255, 255, 0.04) !important;
-}
-
-.stTabs [aria-selected="true"] {
-    color: var(--text-primary) !important;
-    background: rgba(102, 126, 234, 0.1) !important;
-    border-bottom: 3px solid transparent !important;
-    border-image: linear-gradient(90deg, #667eea, #764ba2) 1 !important;
-}
-
-.stTabs [data-baseweb="tab-panel"] {
-    padding-top: 1.5rem;
-}
-
-/* ================================================================
-   STREAMLIT NATIVE METRIC OVERRIDE
-   ================================================================ */
-[data-testid="stMetric"] {
-    background: var(--card-bg) !important;
-    border: 1px solid var(--card-border) !important;
-    border-radius: var(--border-radius) !important;
-    padding: 1rem !important;
-}
-
-[data-testid="stMetricLabel"] {
-    color: var(--text-secondary) !important;
-}
-
-[data-testid="stMetricValue"] {
-    color: var(--text-primary) !important;
-}
-
-/* ================================================================
-   EXPANDER
-   ================================================================ */
-.streamlit-expanderHeader {
-    background: var(--card-bg) !important;
-    border: 1px solid var(--card-border) !important;
-    border-radius: 12px !important;
-    color: var(--text-primary) !important;
-    font-weight: 500 !important;
-}
-
-/* ================================================================
-   PLOTLY CHART CONTAINERS
-   ================================================================ */
-[data-testid="stPlotlyChart"] {
-    background: rgba(255, 255, 255, 0.02) !important;
-    border: 1px solid rgba(255, 255, 255, 0.06) !important;
-    border-radius: var(--border-radius) !important;
-    padding: 0.5rem !important;
-    transition: all var(--transition-speed) ease !important;
-}
-
-[data-testid="stPlotlyChart"]:hover {
-    border-color: rgba(255, 255, 255, 0.12) !important;
-}
-
-/* ================================================================
-   DATAFRAME
-   ================================================================ */
-[data-testid="stDataFrame"] {
-    border-radius: var(--border-radius) !important;
-    overflow: hidden !important;
-}
-
-/* ================================================================
-   DIVIDER
-   ================================================================ */
-hr {
-    border: none !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
-    margin: 1.5rem 0 !important;
-}
-
-/* ================================================================
-   FOOTER SECTION
-   ================================================================ */
-.app-footer {
-    text-align: center;
-    padding: 2rem 0 1rem 0;
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    margin-top: 3rem;
-}
-
-.app-footer .powered-by {
-    background: var(--accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 600;
-}
-
-/* ================================================================
-   PLACEHOLDER CARD
-   ================================================================ */
-.placeholder-card {
-    background: var(--card-bg);
-    border: 2px dashed rgba(255, 255, 255, 0.1);
-    border-radius: var(--border-radius);
-    padding: 3rem 2rem;
-    text-align: center;
-    animation: fadeInUp 0.6s ease-out;
-}
-
-.placeholder-icon {
-    font-size: 3.5rem;
-    margin-bottom: 1rem;
-    display: block;
-    opacity: 0.7;
-}
-
-.placeholder-text {
-    font-size: 1.1rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-}
-
-/* ================================================================
-   KEYFRAME ANIMATIONS
-   ================================================================ */
-@keyframes fadeInUp {
-    0% {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes fadeInDown {
-    0% {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes fadeInScale {
-    0% {
-        opacity: 0;
-        transform: scale(0.95);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-@keyframes shimmer {
-    0% { background-position: -200% center; }
-    100% { background-position: 200% center; }
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-
-/* ================================================================
-   PAGE TITLE OVERRIDE
-   ================================================================ */
-.page-title {
-    font-size: 2rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #00d2ff, #667eea);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 0.3rem;
-}
-
-.page-subtitle {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    margin-bottom: 1.5rem;
-    font-weight: 400;
-}
-
-/* ================================================================
-   SCROLLBAR
-   ================================================================ */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-
-::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.02);
-}
-
-::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-/* ================================================================
-   RESPONSIVE
-   ================================================================ */
-@media (max-width: 768px) {
-    .hero-title {
-        font-size: 2rem;
-    }
-    .hero-subtitle {
-        font-size: 1rem;
-    }
-    .kpi-value {
-        font-size: 1.4rem;
-    }
-    .prediction-price {
-        font-size: 2.2rem;
-    }
-}
-
-/* ================================================================
-   PRICE BREAKDOWN CARD
-   ================================================================ */
-.breakdown-card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 14px;
-    padding: 1.2rem 1.5rem;
-    text-align: center;
-    animation: fadeInUp 0.7s ease-out;
-}
-
-.breakdown-value {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin: 0.3rem 0;
-}
-
-.breakdown-label {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-weight: 500;
-}
-
-/* ================================================================
-   CHART CARD WRAPPER
-   ================================================================ */
-.chart-card {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: var(--border-radius);
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    transition: all var(--transition-speed) ease;
-}
-
-.chart-card:hover {
-    border-color: rgba(255, 255, 255, 0.12);
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-}
-
-.chart-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.8rem;
-    padding-left: 0.5rem;
-    border-left: 3px solid #667eea;
-}
-</style>
-"""
-
-
-def inject_css():
-    """Inject the premium dark theme CSS into the Streamlit app."""
-    st.markdown(CSS, unsafe_allow_html=True)
+    st.markdown(table_html, unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# ── Model Performance Visual ────────────────────────────────────────
+if metrics_dict:
+    perf_cols = st.columns(2)
+
+    # R² comparison chart
+    with perf_cols[0]:
+        model_names = list(metrics_dict.keys())
+        r2_scores = [metrics_dict[m].get('r2', 0) for m in model_names]
+
+        fig_r2 = go.Figure()
+        fig_r2.add_trace(go.Bar(
+            x=model_names,
+            y=r2_scores,
+            marker=dict(
+                color=r2_scores,
+                colorscale=[[0, '#f5576c'], [0.5, '#fbbf24'], [1, '#4ade80']],
+                line=dict(width=0),
+                cornerradius=6,
+            ),
+            text=[f'{v:.4f}' for v in r2_scores],
+            textposition='outside',
+            textfont=dict(color='#94a3b8', size=11),
+            hovertemplate='<b>%{x}</b><br>R²: %{y:.4f}<extra></extra>',
+        ))
+
+        layout_r2 = get_chart_layout('R² Score Comparison', height=400)
+        layout_r2['yaxis']['title'] = 'R² Score'
+        layout_r2['yaxis']['range'] = [0, max(r2_scores) * 1.15] if r2_scores else [0, 1]
+        fig_r2.update_layout(**layout_r2)
+
+        st.plotly_chart(fig_r2, use_container_width=True)
+
+    # MAE & RMSE comparison
+    with perf_cols[1]:
+        mae_scores = [metrics_dict[m].get('mae', 0) for m in model_names]
+        rmse_scores = [metrics_dict[m].get('rmse', 0) for m in model_names]
+
+        fig_err = go.Figure()
+        fig_err.add_trace(go.Bar(
+            x=model_names,
+            y=mae_scores,
+            name='MAE',
+            marker=dict(color='rgba(0, 210, 255, 0.7)', cornerradius=4),
+            text=[f'{v:.1f}' for v in mae_scores],
+            textposition='outside',
+            textfont=dict(color='#94a3b8', size=10),
+        ))
+        fig_err.add_trace(go.Bar(
+            x=model_names,
+            y=rmse_scores,
+            name='RMSE',
+            marker=dict(color='rgba(118, 75, 162, 0.7)', cornerradius=4),
+            text=[f'{v:.1f}' for v in rmse_scores],
+            textposition='outside',
+            textfont=dict(color='#94a3b8', size=10),
+        ))
+
+        layout_err = get_chart_layout('Error Metrics Comparison', height=400)
+        layout_err['yaxis']['title'] = 'Error (Lakhs)'
+        layout_err['barmode'] = 'group'
+        fig_err.update_layout(**layout_err)
+
+        st.plotly_chart(fig_err, use_container_width=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# ── Cross-Validation Scores ─────────────────────────────────────────
+if metrics_dict:
+    st.markdown("""
+    <div class="section-header">📊 Cross-Validation Analysis</div>
+    <div class="section-subheader">Model stability and generalization scores</div>
+    """, unsafe_allow_html=True)
+
+    cv_cols = st.columns(len(metrics_dict))
+    for col, (model_name, model_metrics) in zip(cv_cols, metrics_dict.items()):
+        cv_mean = model_metrics.get('cv_r2_mean', 0)
+        cv_std = model_metrics.get('cv_r2_std', 0)
+        is_best = model_name == best_model_name
+
+        border_color = 'rgba(102, 126, 234, 0.4)' if is_best else 'rgba(255, 255, 255, 0.08)'
+        badge = '<span style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 0.15rem 0.5rem; border-radius: 10px; font-size: 0.7rem; font-weight: 600;">BEST</span>' if is_best else ''
+
+        with col:
+            st.markdown(f"""
+            <div class="kpi-card" style="border-color: {border_color};">
+                <div style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+                    {model_name} {badge}
+                </div>
+                <div class="kpi-value" style="font-size: 1.5rem;">{cv_mean:.4f}</div>
+                <div class="kpi-label">CV R² Mean ± {cv_std:.4f}</div>
+                <div style="margin-top: 0.5rem;">
+                    <div style="background: rgba(255,255,255,0.05); border-radius: 4px; height: 8px; overflow: hidden;">
+                        <div style="width: {cv_mean * 100}%; height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 4px;"></div>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# ── Hyperparameters Section ─────────────────────────────────────────
+hyperparams = metadata.get('hyperparameters', {})
+if hyperparams:
+    st.markdown("""
+    <div class="section-header">⚙️ Optimized Hyperparameters</div>
+    <div class="section-subheader">Best parameters found during hyperparameter tuning</div>
+    """, unsafe_allow_html=True)
+
+    hp_cols = st.columns(min(len(hyperparams), 3))
+    for i, (model_name, params) in enumerate(hyperparams.items()):
+        with hp_cols[i % len(hp_cols)]:
+            params_html = ""
+            for param_name, param_val in params.items():
+                params_html += f"""
+                <div style="display: flex; justify-content: space-between; padding: 0.3rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <span style="color: #94a3b8; font-size: 0.8rem;">{param_name}</span>
+                    <span style="color: #667eea; font-weight: 600; font-size: 0.8rem;">{param_val}</span>
+                </div>
+                """
+
+            st.markdown(f"""
+            <div class="glass-card">
+                <div style="font-weight: 600; color: #f1f5f9; margin-bottom: 0.8rem; font-size: 0.95rem;">
+                    {'⭐ ' if model_name == best_model_name else ''}{model_name}
+                </div>
+                {params_html}
+            </div>
+            """, unsafe_allow_html=True)
+
+# ── Footer ──────────────────────────────────────────────────────────
+st.markdown("""
+<div class="app-footer">
+    <span class="powered-by">AI Insights</span>
+    <span style="margin: 0 0.5rem;">•</span>
+    All insights are dynamically generated from the trained model and dataset
+</div>
+""", unsafe_allow_html=True)
