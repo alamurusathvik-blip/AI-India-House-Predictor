@@ -329,15 +329,24 @@ label, .kpi-label, .breakdown-label, .confidence-label,
 /* ================================================================
    HIDE SIDEBAR & STREAMLIT DEFAULT HEADER CHROME
    ================================================================ */
+/* Sidebar panel */
 [data-testid="stSidebar"] { display: none !important; }
+/* Sidebar toggle/hamburger button — all known Streamlit selectors */
 [data-testid="collapsedControl"] { display: none !important; }
-#MainMenu { visibility: hidden; }
-footer { visibility: hidden; }
+[data-testid="stSidebarCollapsedControl"] { display: none !important; }
+button[kind="header"] { display: none !important; }
+/* Streamlit top header bar */
+[data-testid="stHeader"] { display: none !important; }
+header[data-testid="stHeader"] { display: none !important; }
+#MainMenu { visibility: hidden !important; display: none !important; }
+footer { visibility: hidden !important; }
 [data-testid="stToolbar"] { display: none !important; }
+[data-testid="stDecoration"] { display: none !important; }
 
 /* Push main content below fixed nav */
 [data-testid="stAppViewContainer"] > .main > .block-container {
     padding-top: 1rem !important;
+    margin-top: 56px !important;
 }
 
 

@@ -1,5 +1,5 @@
-import textwrap
 """
+
 AI India House Price Predictor — Home & Prediction Page
 =========================================================
 Main entry point. Shows hero header, horizontal nav, prediction

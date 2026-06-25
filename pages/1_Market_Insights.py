@@ -1,5 +1,5 @@
-import textwrap
 """
+
 Market Insights Page
 =====================
 Interactive analytics dashboard with Plotly charts showing
