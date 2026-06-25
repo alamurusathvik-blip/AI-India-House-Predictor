@@ -1,6 +1,6 @@
 """
 
-AI India House Price Predictor â€” Home & Prediction Page
+AI India House Price Predictor — Home & Prediction Page
 =========================================================
 Main entry point. Shows hero header, horizontal nav, prediction
 form inline, and results. KPI stats shown below.
@@ -13,33 +13,33 @@ from utils import (
     format_number, format_price_per_sqft, predict_price,
 )
 
-# â”€â”€ Page Configuration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Page Configuration ──────────────────────────────────────────────
 st.set_page_config(
     page_title='AI India House Price Predictor',
-    page_icon='ðŸ ',
+    page_icon='🏠',
     layout='wide',
     initial_sidebar_state='collapsed',
 )
 
-# â”€â”€ Inject CSS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Inject CSS ──────────────────────────────────────────────────────
 inject_css()
 
-# â”€â”€ Horizontal Nav Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Horizontal Nav Bar ──────────────────────────────────────────────
 render_html("""
 <nav class="top-nav">
     <div class="top-nav-inner">
-        <div class="top-nav-brand">ðŸ  India House Predictor</div>
+        <div class="top-nav-brand">🏠 India House Predictor</div>
         <div class="top-nav-links">
-            <a class="top-nav-link active" href="/">ðŸ”® Predict</a>
-            <a class="top-nav-link" href="/Market_Insights">ðŸ“Š Market Insights</a>
-            <a class="top-nav-link" href="/Data_Insights">ðŸ“ˆ Data Insights</a>
+            <a class="top-nav-link active" href="/">🔮 Predict</a>
+            <a class="top-nav-link" href="/Market_Insights">📊 Market Insights</a>
+            <a class="top-nav-link" href="/Data_Insights">📈 Data Insights</a>
         </div>
     </div>
 </nav>
 <div style="height: 4rem;"></div>
 """)
 
-# â”€â”€ Load Model â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Load Model ──────────────────────────────────────────────────────
 try:
     model, preprocessor, metadata = load_model()
     stats = metadata.get('dataset_stats', {})
@@ -49,11 +49,11 @@ try:
     city_avg_prices = metadata.get('city_avg_prices', {})
     model_loaded = True
 except Exception as e:
-    st.error(f"âš ï¸ Failed to load model: {e}")
+    st.error(f"⚠️ Failed to load model: {e}")
     model_loaded = False
     st.stop()
 
-# â”€â”€ Hero Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Hero Header ─────────────────────────────────────────────────────
 render_html("""
 <div class="hero-section" style="padding: 1.5rem 0 1rem 0; text-align: center;">
     <div class="hero-title" style="font-size: 2.2rem;">AI India House Price Predictor</div>
@@ -63,7 +63,7 @@ render_html("""
 </div>
 """)
 
-# â”€â”€ KPI Row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── KPI Row ─────────────────────────────────────────────────────────
 total_properties = stats.get('total_properties', 0)
 cities_covered = stats.get('cities_covered', 0)
 avg_price = stats.get('avg_price', 0)
@@ -72,10 +72,10 @@ national_pps = metadata.get('national_avg_price_per_sqft', 0)
 
 kpi_cols = st.columns(4)
 kpis = [
-    ('ðŸ˜ï¸', format_number(total_properties), 'Properties Analyzed'),
-    ('ðŸŒ†', str(cities_covered), 'Cities'),
-    ('ðŸ’°', format_price(avg_price), 'National Avg Price'),
-    ('ðŸ“', format_price_per_sqft(national_pps), 'National Avg/Sq.Ft'),
+    ('🏘️', format_number(total_properties), 'Properties Analyzed'),
+    ('🌆', str(cities_covered), 'Cities'),
+    ('💰', format_price(avg_price), 'National Avg Price'),
+    ('📐', format_price_per_sqft(national_pps), 'National Avg/Sq.Ft'),
 ]
 for col, (icon, val, lbl) in zip(kpi_cols, kpis):
     with col:
@@ -89,7 +89,7 @@ for col, (icon, val, lbl) in zip(kpi_cols, kpis):
 
 render_html("<br>")
 
-# â”€â”€ Prediction Form â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Prediction Form ─────────────────────────────────────────────────
 cities = sorted(city_location_map.keys())
 
 left_col, right_col = st.columns([1, 1], gap="large")
@@ -97,35 +97,35 @@ left_col, right_col = st.columns([1, 1], gap="large")
 with left_col:
     render_html("""<div class="glass-card" style="padding: 1.5rem;">
     <div style="font-size: 1.1rem; font-weight: 700; color: #f1f5f9; margin-bottom: 1.2rem;">
-        ðŸ¡ Property Details
+        🏡 Property Details
     </div>""")
 
     selected_city = st.selectbox(
-        'ðŸŒ† City',
+        '🌆 City',
         options=cities,
         index=0,
         help='Choose the city where the property is located.',
     )
     locations = sorted(city_location_map.get(selected_city, []))
     selected_location = st.selectbox(
-        'ðŸ“ Location',
+        '📍 Location',
         options=locations,
         index=0,
         help='Choose the specific locality.',
     )
 
     bedrooms = st.slider(
-        'ðŸ›ï¸ Bedrooms',
+        '🛏️ Bedrooms',
         min_value=1, max_value=10, value=2,
         help='Number of bedrooms (BHK).',
     )
     area_sqft = st.slider(
-        'ðŸ“ Area (sq.ft)',
+        '📐 Area (sq.ft)',
         min_value=100, max_value=10000, value=1200, step=50,
         help='Built-up area in square feet.',
     )
 
-    # â”€â”€ Coordinate lookup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── Coordinate lookup ───────────────────────────────────────────
     coord_key = f"{selected_city}||{selected_location}"
     is_fallback = coord_key not in location_coords
     default_lat, default_lon = location_coords.get(coord_key, (20.5937, 78.9629))
@@ -141,30 +141,30 @@ with left_col:
         <div style="background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.35);
              border-radius: 8px; padding: 0.6rem 0.9rem; margin: 0.5rem 0;
              color: #fbbf24; font-size: 0.82rem; line-height: 1.5;">
-            âš ï¸ <strong>Approximate location:</strong> Exact coordinates for this locality
-            aren't in our dataset. Using regional centre â€” prediction may be less precise.
+            ⚠️ <strong>Approximate location:</strong> Exact coordinates for this locality
+            aren't in our dataset. Using regional centre — prediction may be less precise.
         </div>
         """)
 
-    # â”€â”€ Sanity check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── Sanity check ────────────────────────────────────────────────
     sqft_per_bed = area_sqft / max(bedrooms, 1)
     if sqft_per_bed < 150:
         render_html(f"""
         <div style="background: rgba(248,113,113,0.10); border: 1px solid rgba(248,113,113,0.35);
              border-radius: 8px; padding: 0.6rem 0.9rem; margin: 0.5rem 0;
              color: #f87171; font-size: 0.82rem; line-height: 1.5;">
-            âš ï¸ <strong>Unusual ratio:</strong> {area_sqft:,} sq.ft for {bedrooms} bedroom(s)
-            is less than 150 sq.ft/bedroom â€” the model may extrapolate unreliably.
+            ⚠️ <strong>Unusual ratio:</strong> {area_sqft:,} sq.ft for {bedrooms} bedroom(s)
+            is less than 150 sq.ft/bedroom — the model may extrapolate unreliably.
         </div>
         """)
 
     render_html("</div>")  # close glass-card
 
-    predict_clicked = st.button('ðŸš€ Predict Price', use_container_width=True)
+    predict_clicked = st.button('🚀 Predict Price', use_container_width=True)
 
-# â”€â”€ Run prediction on click, persist in session_state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Run prediction on click, persist in session_state ───────────────
 if predict_clicked:
-    with st.spinner('Analysing property dataâ€¦'):
+    with st.spinner('Analysing property data…'):
         predicted_price = predict_price(
             city=selected_city,
             location=selected_location,
@@ -187,7 +187,7 @@ if predict_clicked:
         'is_fallback': is_fallback,
     }
 
-# â”€â”€ Results Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Results Panel ───────────────────────────────────────────────────
 with right_col:
     pred = st.session_state.get('last_prediction')
 
@@ -195,7 +195,7 @@ with right_col:
         render_html("""
         <div class="placeholder-card" style="min-height: 340px; display: flex;
              flex-direction: column; align-items: center; justify-content: center;">
-            <span class="placeholder-icon">ðŸ¡</span>
+            <span class="placeholder-icon">🏡</span>
             <div class="placeholder-text">
                 Fill in the property details on the left and click
                 <strong>Predict Price</strong> to get an instant valuation.
@@ -213,8 +213,8 @@ with right_col:
             <div class="prediction-label">Estimated Property Value</div>
             <div class="prediction-price">{formatted_price}</div>
             <div class="prediction-subtitle">
-                {pred['location']}, {pred['city']} &nbsp;Â·&nbsp;
-                {pred['bedrooms']} BHK &nbsp;Â·&nbsp; {format_number(pred['area_sqft'])} sq.ft
+                {pred['location']}, {pred['city']} &nbsp;·&nbsp;
+                {pred['bedrooms']} BHK &nbsp;·&nbsp; {format_number(pred['area_sqft'])} sq.ft
             </div>
         </div>
         """)
@@ -224,8 +224,8 @@ with right_col:
         # Typical range (honestly labelled)
         render_html(f"""
         <div class="confidence-card">
-            <div class="confidence-label">ðŸ“Š Typical Price Range (Â±10%)</div>
-            <div class="confidence-range">{format_price(low)} â€” {format_price(high)}</div>
+            <div class="confidence-label">📊 Typical Price Range (±10%)</div>
+            <div class="confidence-range">{format_price(low)} — {format_price(high)}</div>
             <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.4rem;">
                 Based on typical market variance, not a statistical model interval.
             </div>
@@ -241,20 +241,20 @@ with right_col:
             diff_pct = ((predicted_pps_rupees - market_pps_rupees) / market_pps_rupees) * 100
             is_above = diff_pct > 0
             badge_class = 'badge-above' if is_above else 'badge-below'
-            badge_text = f"{'â†‘' if is_above else 'â†“'} {abs(diff_pct):.1f}% {'above' if is_above else 'below'} avg"
+            badge_text = f"{'↑' if is_above else '↓'} {abs(diff_pct):.1f}% {'above' if is_above else 'below'} avg"
         else:
-            badge_text, badge_class = 'â€”', ''
+            badge_text, badge_class = '—', ''
 
         b1, b2, b3 = st.columns(3)
         with b1:
             render_html(f"""<div class="breakdown-card">
                 <div class="breakdown-label">Your Price/Sq.Ft</div>
-                <div class="breakdown-value" style="color:#00d2ff;">â‚¹{predicted_pps_rupees:,.0f}</div>
+                <div class="breakdown-value" style="color:#00d2ff;">₹{predicted_pps_rupees:,.0f}</div>
             </div>""")
         with b2:
             render_html(f"""<div class="breakdown-card">
                 <div class="breakdown-label">{pred['city']} Avg/Sq.Ft</div>
-                <div class="breakdown-value" style="color:#667eea;">â‚¹{market_pps_rupees:,.0f}</div>
+                <div class="breakdown-value" style="color:#667eea;">₹{market_pps_rupees:,.0f}</div>
             </div>""")
         with b3:
             render_html(f"""<div class="breakdown-card">
@@ -267,11 +267,11 @@ with right_col:
             <div style="margin-top:1rem; background: rgba(251,191,36,0.10);
                  border:1px solid rgba(251,191,36,0.3); border-radius:8px;
                  padding:0.5rem 0.9rem; color:#fbbf24; font-size:0.78rem;">
-                ðŸ“ Approximate location used â€” coordinates inferred from city centre.
+                📍 Approximate location used — coordinates inferred from city centre.
             </div>
             """)
 
-# â”€â”€ Data Pipeline Stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Data Pipeline Stats ─────────────────────────────────────────────
 if model_loaded:
     cleaning_stats = metadata.get('cleaning_stats', {})
     if cleaning_stats:
@@ -282,10 +282,10 @@ if model_loaded:
         """)
         pipe_cols = st.columns(4)
         pipeline_items = [
-            ('ðŸ“¥', 'Original Records', format_number(cleaning_stats.get('original_rows', 0))),
-            ('âœ…', 'Cleaned Records', format_number(cleaning_stats.get('cleaned_rows', 0))),
-            ('ðŸ—‘ï¸', 'Duplicates Removed', format_number(cleaning_stats.get('duplicates_removed', 0))),
-            ('ðŸ“', 'Invalid Coords Removed', format_number(cleaning_stats.get('invalid_coordinates_removed', 0))),
+            ('📥', 'Original Records', format_number(cleaning_stats.get('original_rows', 0))),
+            ('✅', 'Cleaned Records', format_number(cleaning_stats.get('cleaned_rows', 0))),
+            ('🗑️', 'Duplicates Removed', format_number(cleaning_stats.get('duplicates_removed', 0))),
+            ('📍', 'Invalid Coords Removed', format_number(cleaning_stats.get('invalid_coordinates_removed', 0))),
         ]
         for col, (icon, label, value) in zip(pipe_cols, pipeline_items):
             with col:
@@ -295,13 +295,13 @@ if model_loaded:
                     <div class="kpi-label">{label}</div>
                 </div>""")
 
-# â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Footer ──────────────────────────────────────────────────────────
 render_html("""
 <div class="app-footer">
     <span class="powered-by">Powered by Machine Learning</span>
-    <span style="margin: 0 0.5rem;">â€¢</span>
+    <span style="margin: 0 0.5rem;">•</span>
     Built with Streamlit &amp; Plotly
-    <span style="margin: 0 0.5rem;">â€¢</span>
+    <span style="margin: 0 0.5rem;">•</span>
     India Real Estate Intelligence Platform
 </div>
 """)
