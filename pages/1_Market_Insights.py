@@ -7,6 +7,7 @@ city-wise price trends, distributions, and market comparisons.
 """
 
 import streamlit as st
+import textwrap
 import pandas as pd
 import numpy as np
 import plotly.express as px
